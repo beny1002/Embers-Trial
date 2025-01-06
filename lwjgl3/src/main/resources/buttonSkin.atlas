@@ -1,0 +1,15 @@
+
+buttonSkin.png
+size: 128, 128
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+pixil-frame-0
+  rotate: false
+  xy: 1, 1
+  size: 100, 100
+  split: 3, 3, 38, 36
+  pad: 8, 8, 43, 41
+  orig: 100, 100
+  offset: 0, 0
+  index: -1

@@ -20,13 +20,6 @@ public class Lwjgl3Launcher {
         return new Lwjgl3Application(new Main(), getDefaultConfiguration());
     }
 
-    public void create() {
-        Texture backgroundTexture;
-        FitViewport viewport;
-
-        backgroundTexture = new Texture("bacground.png");
-        viewport = new FitViewport(8, 5);
-    }
 
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
