@@ -20,9 +20,9 @@ public class Main implements ApplicationListener {
 
     @Override
     public void create() {
-        backgroundTexture = new Texture("background.png");
+        backgroundTexture = new Texture("bacground.png");
+        viewport = new FitViewport(8, 5);
     }
-    viewport = new FitViewport(8,5);
 
     @Override
     public void resize(int width, int height) {
