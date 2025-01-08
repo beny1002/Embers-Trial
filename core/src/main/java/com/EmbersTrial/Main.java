@@ -2,21 +2,16 @@ package com.EmbersTrial;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main implements ApplicationListener {
@@ -26,7 +21,6 @@ public class Main implements ApplicationListener {
     //FitViewport viewport;
     Stage stage;
     Skin skin;
-
 
     @Override
     public void create() {
@@ -38,10 +32,16 @@ public class Main implements ApplicationListener {
 
         spriteBatch = new SpriteBatch();
         */
+
+        // Load the texture for menuBox (from local assets directory)
+        menuBox = new Texture(Gdx.files.internal("icons/emberx64.png"));
+
+        // Set up skin and stage for UI
         skin = new Skin(Gdx.files.internal("metal-ui.json"));
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
+        // Create the root table for UI layout
         Table root = new Table();
         root.setFillParent(true);
         stage.addActor(root);
@@ -58,16 +58,11 @@ public class Main implements ApplicationListener {
 
         TextButton optionButton = new TextButton("options", skin);
         root.add(optionButton);
-
-
-
-
     }
 
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
-
     }
 
     @Override
@@ -92,7 +87,6 @@ public class Main implements ApplicationListener {
     }
     private void draw() {
 
-
         /* some tests for background
         viewport.apply();
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
@@ -107,8 +101,6 @@ public class Main implements ApplicationListener {
 
         spriteBatch.end();
     }
-
-
 
     private void createButton(String name,  float x, float y, float width, float height) {
         Sprite sprite = new Sprite(menuBox);
@@ -130,5 +122,6 @@ public class Main implements ApplicationListener {
     @Override
     public void dispose() {
         stage.dispose();
+        if (menuBox != null) menuBox.dispose(); // Dispose of menuBox if loaded
     }
 }
