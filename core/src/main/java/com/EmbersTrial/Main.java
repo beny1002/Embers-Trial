@@ -10,15 +10,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main implements ApplicationListener {
@@ -40,6 +38,7 @@ public class Main implements ApplicationListener {
 
         spriteBatch = new SpriteBatch();
         */
+        skin = new Skin(Gdx.files.internal("metal-ui.json"));
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
@@ -47,14 +46,20 @@ public class Main implements ApplicationListener {
         root.setFillParent(true);
         stage.addActor(root);
 
-        skin = new Skin(Gdx.files.internal("buttonSkin.json"));
+        root.padTop(100);
 
-        Button button = new Button(skin);
-        root.add(button);
+        Label gameTitle = new Label("Ember's Trials", skin);
+        root.add(gameTitle).spaceBottom(20);
         root.row();
-        Button ass = new Button(skin);
-        root.add(ass);
-        root.left();
+
+        TextButton startButton = new TextButton("start", skin);
+        root.add(startButton).width(200).height(50).spaceBottom(10);
+        root.row();
+
+        TextButton optionButton = new TextButton("options", skin);
+        root.add(optionButton);
+
+
 
 
     }
