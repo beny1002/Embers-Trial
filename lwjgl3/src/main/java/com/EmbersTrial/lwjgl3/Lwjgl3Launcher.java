@@ -3,40 +3,66 @@ package com.EmbersTrial.lwjgl3;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.EmbersTrial.Main;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.EmbersTrial.S3Manager;
 
+import java.io.File;
 
-/** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
     public static void main(String[] args) {
+        if (StartupHelper.startNewJvmIfRequired()) return; //macOS/Windows JVM helper
 
-        if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS support and helps on Windows.
+        //this makes window icons downloaded from S3
+        downloadWindowIcons();
+
         createApplication();
-
     }
 
     private static Lwjgl3Application createApplication() {
         return new Lwjgl3Application(new Main(), getDefaultConfiguration());
     }
 
-
-
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setTitle("Ember's Trials");
-        //// Vsync limits the frames per second to what your hardware can display, and helps eliminate
-        //// screen tearing. This setting doesn't always work on Linux, so the line after is a safeguard.
         configuration.useVsync(true);
-        //// Limits FPS to the refresh rate of the currently active monitor, plus 1 to try to match fractional
-        //// refresh rates. The Vsync setting above should limit the actual FPS to match the monitor.
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
-        //// If you remove the above line and set Vsync to false, you can get unlimited FPS, which can be
-        //// useful for testing performance, but can also be very stressful to some hardware.
-        //// You may also need to configure GPU drivers to fully disable Vsync; this can cause screen tearing.
         configuration.setWindowedMode(1280, 720);
-        //// You can change these files; they are in lwjgl3/src/main/resources/ .
-        configuration.setWindowIcon("emberx128.png", "emberx64.png", "emberx32.png", "emberx16.png");
+
+        //set window icons after downloading
+        configuration.setWindowIcon(
+            "lwjgl3/icons/emberx128.png",
+            "lwjgl3/icons/emberx64.png",
+            "lwjgl3/icons/emberx32.png",
+            "lwjgl3/icons/emberx16.png"
+        );
+
         return configuration;
+    }
+
+    private static void downloadWindowIcons() {
+        S3Manager s3Manager = new S3Manager();
+        String[] icons = {"emberx128.png", "emberx64.png", "emberx32.png", "emberx16.png"};
+        String s3Path = "assets/icons/"; //path in the S3 bucket
+        String localPath = "lwjgl3/icons/"; //path in the local project directory
+
+        //makes sure the local directory exists
+        File directory = new File(localPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        //try to download missing icons
+        for (String icon : icons) {
+            File iconFile = new File(localPath + icon);
+            if (!iconFile.exists()) {
+                System.out.println("Icon missing locally, attempting to download: " + icon);
+                s3Manager.downloadFile(s3Path + icon, localPath + icon);
+                if (iconFile.exists()) {
+                    System.out.println("Successfully downloaded: " + icon);
+                } else {
+                    System.err.println("Failed to download: " + icon + ". Ensure S3 bucket and credentials are correct.");
+                }
+            }
+        }
     }
 }
