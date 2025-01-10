@@ -1,13 +1,17 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 eclipse.project.name = appName + '-core'
 
+// set java compatibility for the core project
+java {
+  sourceCompatibility = JavaVersion.VERSION_11 // or your desired version
+  targetCompatibility = JavaVersion.VERSION_11
+}
+
 dependencies {
+  // core libgdx dependencies
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
+
+  // aws sdk dependencies for s3 functionality
   implementation "software.amazon.awssdk:s3:2.20.0"
   implementation "software.amazon.awssdk:auth:2.20.0"
-
-
-  if(enableGraalNative == 'true') {
-    implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
-  }
 }

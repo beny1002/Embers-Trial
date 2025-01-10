@@ -2,125 +2,142 @@ package com.EmbersTrial;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main implements ApplicationListener {
     private Texture backgroundTexture;
-    private Texture menuBox;
     private SpriteBatch spriteBatch;
     private Stage stage;
     private Skin skin;
 
+    private FitViewport uiViewport;
+
     @Override
     public void create() {
-        // Load background and menu box textures
-        backgroundTexture = new Texture("background.png");
-        menuBox = new Texture(Gdx.files.internal("icons/emberx64.png"));
+        // setting up the ui viewport to handle button and menu scaling
+        uiViewport = new FitViewport(1920, 1080);
 
-        // Initialize sprite batch
-        spriteBatch = new SpriteBatch();
-
-        // Set up skin and stage for UI
-        skin = new Skin(Gdx.files.internal("metal-ui.json"));
-        stage = new Stage(new ScreenViewport());
+        // setting up the stage with the viewport
+        stage = new Stage(uiViewport);
         Gdx.input.setInputProcessor(stage);
 
-        // Create the main menu table
+        // loading the background image and setting filtering for smooth scaling
+        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        backgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        // initializing the sprite batch for rendering
+        spriteBatch = new SpriteBatch();
+
+        // loading the ui skin
+        skin = new Skin(Gdx.files.internal("metal-ui.json"));
+
+        // setting up the main menu table
         Table mainMenu = new Table();
-        mainMenu.setFillParent(true);
+        mainMenu.setFillParent(true); // this makes the table stretch to fit the viewport
         stage.addActor(mainMenu);
 
-        // Add a game title
-        Label gameTitle = new Label("Ember's Trials", skin);
-        gameTitle.setFontScale(2);
-        mainMenu.add(gameTitle).spaceBottom(20);
-        mainMenu.row();
+        // adding the game title to the menu
+        Texture titleTexture = new Texture(Gdx.files.internal("Logos/gameLogo.png"));
+        Image gameTitleImage = new Image(titleTexture);
+        mainMenu.add(gameTitleImage)
+            .width(uiViewport.getWorldWidth() * 0.5f) // take up half the viewport width
+            .height(uiViewport.getWorldHeight() * 0.2f) // take up 20% of viewport height
+            .spaceBottom(20);
+        mainMenu.row(); // move to the next row for buttons
 
-        // Add buttons to the main menu
-        TextButton startButton = new TextButton("Start", skin);
+        // adding the start button
+        TextButton startButton = new TextButton("Start Game", skin);
+        startButton.getLabel().setFontScale(2f); //This line is temporary to scale the font size
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 stage.clear();
-                Table loadingScreen = new Table();
-                loadingScreen.setFillParent(true);
-                loadingScreen.add(new Label("Loading...", skin));
-                stage.addActor(loadingScreen);
-                // Simulate loading complete: Clear and show gameScreen
-                Gdx.app.postRunnable(() -> {
-                    stage.clear();
-                    Table gameScreen = new Table();
-                    gameScreen.setFillParent(true);
-                    gameScreen.add(new Label("Game Screen", skin));
-                    stage.addActor(gameScreen);
-                });
+                CutsceneScreen cutsceneScreen = new CutsceneScreen(stage, skin);
+                cutsceneScreen.showCutscene(() -> System.out.println("Cutscene completed"));
             }
         });
-        mainMenu.add(startButton).width(200).height(50).spaceBottom(10);
+        mainMenu.add(startButton)
+            .width(uiViewport.getWorldWidth() * 0.3f) // 30% of the viewport width
+            .height(uiViewport.getWorldHeight() * 0.1f) // 10% of the viewport height
+            .spaceBottom(10);
         mainMenu.row();
 
+        // adding the options button
         TextButton optionButton = new TextButton("Options", skin);
-        mainMenu.add(optionButton).width(200).height(50).spaceBottom(10);
+        optionButton.getLabel().setFontScale(2f); //This line is temporary to scale the font size
+        optionButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                OptionsPage optionsMenu = new OptionsPage(stage, skin, mainMenu);
+                optionsMenu.showOptionsPage();
+            }
+        });
+        mainMenu.add(optionButton)
+            .width(uiViewport.getWorldWidth() * 0.3f)
+            .height(uiViewport.getWorldHeight() * 0.1f)
+            .spaceBottom(10);
         mainMenu.row();
 
+        // adding the exit button
         TextButton exitButton = new TextButton("Exit", skin);
+        exitButton.getLabel().setFontScale(2f); //This line is temporary to scale the font size
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.exit();
             }
         });
-        mainMenu.add(exitButton).width(200).height(50);
+        mainMenu.add(exitButton)
+            .width(uiViewport.getWorldWidth() * 0.3f)
+            .height(uiViewport.getWorldHeight() * 0.1f);
     }
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
+        // updates the viewport when the screen size changes
+        uiViewport.update(width, height, true);
+        Gdx.input.setInputProcessor(stage);
     }
 
     @Override
     public void render() {
-        // Clear the screen
-        ScreenUtils.clear(Color.WHITE);
+        // clearing the screen
+        ScreenUtils.clear(1, 1, 1, 1);
 
-        // Begin drawing the background
+        // drawing the background
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+
         spriteBatch.begin();
-        spriteBatch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        spriteBatch.draw(backgroundTexture, 0, 0, screenWidth, screenHeight);
         spriteBatch.end();
 
-        // Render the stage
+        // rendering the ui
         stage.act();
         stage.draw();
     }
 
-
     @Override
     public void pause() {
-        // Invoked when the application is paused
+        // not used but needed for the interface
     }
 
     @Override
     public void resume() {
-        // Invoked when the application is resumed after pause
+        // not used but needed for the interface
     }
 
     @Override
     public void dispose() {
-        // Dispose resources
+        // cleaning up resources when the app closes
         if (backgroundTexture != null) backgroundTexture.dispose();
-        if (menuBox != null) menuBox.dispose();
         if (spriteBatch != null) spriteBatch.dispose();
         if (stage != null) stage.dispose();
         if (skin != null) skin.dispose();

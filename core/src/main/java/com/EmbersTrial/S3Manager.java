@@ -13,10 +13,8 @@ public class S3Manager {
     private final String bucketName = "embertrials";
 
     public S3Manager() {
-        // Define AWS credentials (replace with your actual credentials)
         AwsBasicCredentials awsCreds = AwsBasicCredentials.create("AKIAYRH5NC7XO6HV2U47", "16vwSPoXltIkuV0XApkVcTHJZJxxK6Ug0s3lh3zq");
 
-        // Initialize the S3 client with credentials and region
         s3 = S3Client.builder()
             .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
             .region(Region.US_WEST_2) // Replace with your region
