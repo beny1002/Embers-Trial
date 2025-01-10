@@ -26,11 +26,19 @@ allprojects {
 
 configure(subprojects) {
   apply plugin: 'java-library'
-  sourceCompatibility = 8
+
+  // set java compatibility
+  java {
+    sourceCompatibility = JavaVersion.VERSION_11 // change to your desired version
+    targetCompatibility = JavaVersion.VERSION_11
+  }
 
   dependencies {
     implementation "software.amazon.awssdk:s3:2.20.0"
     implementation "software.amazon.awssdk:auth:2.20.0"
+
+    // add slf4j for logging
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
   }
 
   tasks.register('generateAssetList') {

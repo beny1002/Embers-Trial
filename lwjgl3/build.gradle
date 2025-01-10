@@ -14,10 +14,10 @@ mainClassName = 'com.EmbersTrial.lwjgl3.Lwjgl3Launcher'
 application.setMainClass(mainClassName)
 eclipse.project.name = appName + '-lwjgl3'
 
-java.sourceCompatibility = 8
-java.targetCompatibility = 8
-if (JavaVersion.current().isJava9Compatible()) {
-  compileJava.options.release.set(8)
+// set java compatibility to match the core project
+java {
+  sourceCompatibility = JavaVersion.VERSION_11 // or your desired version
+  targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {
@@ -31,6 +31,9 @@ dependencies {
   // AWS SDK for S3 functionality
   implementation "software.amazon.awssdk:s3:2.20.0"
   implementation "software.amazon.awssdk:auth:2.20.0"
+
+  // SLF4J simple logging implementation
+  implementation 'org.slf4j:slf4j-simple:1.7.36'
 
   if (enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-backend-lwjgl3:$graalHelperVersion"
@@ -47,7 +50,7 @@ run {
 }
 
 jar {
-  // Sets the name of the .jar file this produces to the name of the game or app, with the version after.
+  // sets the name of the .jar file this produces to the name of the game or app, with the version after.
   archiveFileName.set("${appName}-${projectVersion}.jar")
   duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
   dependsOn configurations.runtimeClasspath
@@ -56,45 +59,18 @@ jar {
   dependencies {
     exclude('META-INF/INDEX.LIST', 'META-INF/maven/**')
   }
-  // Setting the manifest makes the JAR runnable.
+  // setting the manifest makes the JAR runnable.
   manifest {
     attributes 'Main-Class': project.mainClassName
   }
-  // This last step may help on some OSes that need extra instruction to make runnable JARs.
+  // make the jar executable
   doLast {
     file(archiveFile).setExecutable(true, false)
   }
 }
 
 /*construo {
-  // Name of the executable
-  name.set(appName)
-  // Human-readable name, used for example in the `.app` name for macOS
-  humanName.set(appName)
-  version.set("$projectVersion")
-
-  targets.configure {
-    create("linuxX64", Target.Linux) {
-      architecture.set(Target.Architecture.X86_64)
-      jdkUrl.set("https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.12_7.tar.gz")
-    }
-    create("macM1", Target.MacOs) {
-      architecture.set(Target.Architecture.AARCH64)
-      jdkUrl.set("https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.12_7.tar.gz")
-      identifier.set("com.EmbersTrial." + appName)
-      macIcon.set(project.file("icons/logo.icns"))
-    }
-    create("macX64", Target.MacOs) {
-      architecture.set(Target.Architecture.X86_64)
-      jdkUrl.set("https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_x64_mac_hotspot_17.0.12_7.tar.gz")
-      identifier.set("com.EmbersTrial." + appName)
-      macIcon.set(project.file("icons/logo.icns"))
-    }
-    create("winX64", Target.Windows) {
-      architecture.set(Target.Architecture.X86_64)
-      jdkUrl.set("https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_x64_windows_hotspot_17.0.12_7.zip")
-    }
-  }
+  // Keep this block commented if unused.
 }*/
 
 // Equivalent to the jar task; here for compatibility with gdx-setup.
