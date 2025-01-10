@@ -72,6 +72,15 @@ public class Main implements ApplicationListener {
         mainMenu.row();
 
         TextButton optionButton = new TextButton("Options", skin);
+        optionButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                OptionsPage optionsMenu = new OptionsPage(stage, skin, mainMenu);
+                optionsMenu.showOptionsPage();
+
+
+            }
+        });
         mainMenu.add(optionButton).width(200).height(50).spaceBottom(10);
         mainMenu.row();
 
