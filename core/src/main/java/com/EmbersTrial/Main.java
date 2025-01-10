@@ -49,23 +49,19 @@ public class Main implements ApplicationListener {
         mainMenu.row();
 
         // Add buttons to the main menu
-        TextButton startButton = new TextButton("Start", skin);
+        TextButton startButton = new TextButton("Start Game", skin);
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 stage.clear();
-                Table loadingScreen = new Table();
-                loadingScreen.setFillParent(true);
-                loadingScreen.add(new Label("Loading...", skin));
-                stage.addActor(loadingScreen);
-                // Simulate loading complete: Clear and show gameScreen
-                Gdx.app.postRunnable(() -> {
-                    stage.clear();
-                    Table gameScreen = new Table();
-                    gameScreen.setFillParent(true);
-                    gameScreen.add(new Label("Game Screen", skin));
-                    stage.addActor(gameScreen);
+
+
+                //Transition to cutscene screen
+                CutsceneScreen cutsceneScreen = new CutsceneScreen(stage, skin);
+                cutsceneScreen.showCutscene(() -> {
+                    System.out.println("Cutscene completed");
                 });
+
             }
         });
         mainMenu.add(startButton).width(200).height(50).spaceBottom(10);
