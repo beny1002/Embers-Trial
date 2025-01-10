@@ -1,6 +1,6 @@
-# RPG Game AWS Hackathon Project
+# Ember's Trial AWS Hackathon Project
 
-A simple round-based RPG game built in Java using LibGDX, featuring endless rounds of combat, experience-based progression, and customizable kit upgrades. This project was developed as part of a hackathon using an Agile approach to collaboration and development.
+Ember's Trial is a round-based RPG game built in Java using LibGDX, featuring endless rounds of combat, experience-based progression, and customizable kit upgrades. This project was developed as part of Amazon's AWS hackathon using an Agile approach to collaboration and development.
 
 ---
 
@@ -14,7 +14,7 @@ A simple round-based RPG game built in Java using LibGDX, featuring endless roun
 ---
 
 ## **Overview**
-This project showcases a collaborative effort to develop an engaging RPG game under a limited timeframe. The game focuses on survival in a single room where players fight through endless rounds of increasingly difficult enemies. Players earn experience points to level up, improve their skills, and upgrade their kits to adapt to tougher challenges.
+With the incorporation of Amazon S3 and Amazon's AI Assistant, the game focuses on survival in a single room where players fight through endless rounds of increasingly difficult enemies. Players earn experience points to level up, improve their skills, and upgrade their kits to adapt to tougher challenges.
 
 ---
 
@@ -38,7 +38,11 @@ This project showcases a collaborative effort to develop an engaging RPG game un
 ---
 
 ## **Team Members**
-TBD
+- Sean Brouwer
+- Seth Phillips
+- Kevin Nguyen
+- Nathan Phommoranth
+- Benjamin Yeung
 
 ---
 
