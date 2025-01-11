@@ -62,14 +62,12 @@ public class Main implements ApplicationListener {
             public void clicked(InputEvent event, float x, float y) {
                 stage.clear();
                 backgroundTexture.dispose();
-                //CutsceneScreen cutsceneScreen = new CutsceneScreen(stage, skin);
-                //cutsceneScreen.showCutscene(() -> System.out.println("Cutscene completed"));
-                GameScreen gameScreen = new GameScreen();
+                gameScreen = new GameScreen(); // Assign to the field
                 gameScreen.showGameScreen();
-
-
             }
         });
+                //CutsceneScreen cutsceneScreen = new CutsceneScreen(stage, skin);
+                //cutsceneScreen.showCutscene(() -> System.out.println("Cutscene completed"));
         mainMenu.add(startButton)
             .width(uiViewport.getWorldWidth() * 0.3f) // 30% of the viewport width
             .height(uiViewport.getWorldHeight() * 0.1f) // 10% of the viewport height
