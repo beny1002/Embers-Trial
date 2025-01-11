@@ -16,6 +16,8 @@ public class Main implements ApplicationListener {
     private SpriteBatch spriteBatch;
     private Stage stage;
     private Skin skin;
+    private GameScreen gameScreen;
+
 
     private FitViewport uiViewport;
 
@@ -59,8 +61,13 @@ public class Main implements ApplicationListener {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 stage.clear();
-                CutsceneScreen cutsceneScreen = new CutsceneScreen(stage, skin);
-                cutsceneScreen.showCutscene(() -> System.out.println("Cutscene completed"));
+                backgroundTexture.dispose();
+                //CutsceneScreen cutsceneScreen = new CutsceneScreen(stage, skin);
+                //cutsceneScreen.showCutscene(() -> System.out.println("Cutscene completed"));
+                GameScreen gameScreen = new GameScreen();
+                gameScreen.showGameScreen();
+
+
             }
         });
         mainMenu.add(startButton)
@@ -115,13 +122,15 @@ public class Main implements ApplicationListener {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
 
-        spriteBatch.begin();
-        spriteBatch.draw(backgroundTexture, 0, 0, screenWidth, screenHeight);
-        spriteBatch.end();
-
-        // rendering the ui
-        stage.act();
-        stage.draw();
+        if (gameScreen != null) {
+            gameScreen.render();
+        } else {
+            spriteBatch.begin();
+            spriteBatch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            spriteBatch.end();
+            stage.act();
+            stage.draw();
+        }
     }
 
     @Override
