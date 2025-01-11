@@ -1,4 +1,4 @@
-package com.EmbersTrial;
+package com.EmbersTrial.screens;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;

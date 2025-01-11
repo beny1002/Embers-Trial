@@ -1,5 +1,8 @@
 package com.EmbersTrial;
 
+import com.EmbersTrial.screens.CutsceneScreen;
+import com.EmbersTrial.screens.GameScreen;
+import com.EmbersTrial.screens.MainMenuScreen;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 

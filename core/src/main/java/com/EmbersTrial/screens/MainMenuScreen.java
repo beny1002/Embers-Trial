@@ -1,5 +1,6 @@
-package com.EmbersTrial;
+package com.EmbersTrial.screens;
 
+import com.EmbersTrial.Main;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

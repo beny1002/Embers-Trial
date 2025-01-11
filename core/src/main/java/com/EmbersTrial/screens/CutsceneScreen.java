@@ -1,4 +1,4 @@
-package com.EmbersTrial;
+package com.EmbersTrial.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -39,7 +39,7 @@ public class CutsceneScreen {
         for (int i = 0; i < dialogue.length; i++) {
             String line = dialogue[i];
             Label dialogueLabel = new Label(line, skin);
-            dialogueLabel.setFontScale(1.5f);
+            dialogueLabel.setFontScale(2.0f);
             dialogueLabel.getColor().a = 0; //start initially transparent
 
             dialogueTable.row();
