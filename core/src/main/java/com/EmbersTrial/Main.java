@@ -55,7 +55,7 @@ public class Main implements ApplicationListener {
             cutsceneScreen.dispose();
             cutsceneScreen = null;
         }
-        gameScreen = new GameScreen();
+        gameScreen = new GameScreen(this);
         currentScreen = "game";
     }
 
@@ -74,6 +74,15 @@ public class Main implements ApplicationListener {
         if (cutsceneScreen != null) cutsceneScreen.dispose();
         if (gameScreen != null) gameScreen.dispose();
     }
+    public void setMainMenuScreen() {
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null; // ensure gameScreen is cleared
+        }
+        mainMenuScreen = new MainMenuScreen(this); // reinitialize the main menu screen
+        currentScreen = "mainMenu"; // switch to the main menu
+    }
+
 
     @Override
     public void pause() {}

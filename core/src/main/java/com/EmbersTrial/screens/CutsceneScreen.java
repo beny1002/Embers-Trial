@@ -18,6 +18,7 @@ public class CutsceneScreen {
     private FitViewport viewport;
     private TextButton skipButton;
     private boolean buttonAdded = false; //track if the skip button has been added
+    private InputAdapter cutsceneInputAdapter;
 
     public CutsceneScreen(Runnable onComplete) {
         //set up stage and viewport
@@ -31,7 +32,9 @@ public class CutsceneScreen {
         //set up input handling with inputmultiplexer
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage); //stage must handle button clicks
-        multiplexer.addProcessor(new InputAdapter() {
+
+        //initialize inputadapter
+        cutsceneInputAdapter = new InputAdapter() {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 Gdx.app.log("CutsceneScreen", "Screen clicked: Adding skip button.");
@@ -41,7 +44,9 @@ public class CutsceneScreen {
                 }
                 return true; //consume the event
             }
-        });
+        };
+
+        multiplexer.addProcessor(cutsceneInputAdapter);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
@@ -75,7 +80,11 @@ public class CutsceneScreen {
         //transition to gamescreen after dialogue ends
         stage.addAction(Actions.sequence(
             Actions.delay(dialogue.length * 2f + 2f), //total duration of dialogue
-            Actions.run(onComplete) //callback to transition
+            Actions.run(() -> {
+                Gdx.app.log("CutsceneScreen", "Cutscene ended. Removing input listener.");
+                disposeInput(); //remove the input listener when cutscene ends
+                onComplete.run(); //callback to transition
+            })
         ));
     }
 
@@ -93,6 +102,7 @@ public class CutsceneScreen {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
                 Gdx.app.log("CutsceneScreen", "Skip button clicked."); //debug log
+                disposeInput(); //remove input listener on skip
                 stage.clear(); //clear all ongoing actions and actors
                 onComplete.run(); //immediately transition to the next screen
             }
@@ -100,6 +110,15 @@ public class CutsceneScreen {
 
         stage.addActor(skipButton);
         Gdx.app.log("CutsceneScreen", "Skip button added to stage.");
+    }
+
+    private void disposeInput() {
+        //clear the input listener
+        if (Gdx.input.getInputProcessor() instanceof InputMultiplexer) {
+            InputMultiplexer multiplexer = (InputMultiplexer) Gdx.input.getInputProcessor();
+            multiplexer.removeProcessor(cutsceneInputAdapter);
+        }
+        Gdx.app.log("CutsceneScreen", "Input listener disposed.");
     }
 
     public void render() {
@@ -120,6 +139,7 @@ public class CutsceneScreen {
     }
 
     public void dispose() {
+        disposeInput(); //ensure the input listener is removed
         stage.dispose();
         skin.dispose();
     }
