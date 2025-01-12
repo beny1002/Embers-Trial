@@ -65,10 +65,10 @@ public class ItemClass {
 
     // Upgrade Class for Dropped Items
     class Upgrade {
-        private static int numWaves = 1; // Number of waves
+        int numWaves = 1; // Number of waves
 
         // Method to increase wave count
-        public static void increaseWaveCount() {
+        public void increaseWaveCount() {
             numWaves++;
         }
 
