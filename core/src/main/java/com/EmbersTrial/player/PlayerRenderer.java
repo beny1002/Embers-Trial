@@ -22,9 +22,19 @@ public class PlayerRenderer {
         }
     }
 
+    public void setTexture(Texture newTexture) {
+        if (playerTexture != null) {
+            playerTexture.dispose(); // Dispose of the old texture
+        }
+        playerTexture = newTexture; // Assign the new texture
+        originalWidth = newTexture.getWidth();
+        originalHeight = newTexture.getHeight();
+    }
+
     public void dispose() {
         if (playerTexture != null) {
             playerTexture.dispose();
+            playerTexture = null;
         }
     }
 }
