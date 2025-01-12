@@ -1,49 +1,81 @@
 package com.EmbersTrial.Items;
+//the base value of each Item is the beginning now just change each item value to be a variable and create new items that just implement this
+// Abstract class Item
+abstract class Item implements Weapons {
+    protected String name;
+    protected double baseDamage;
+    protected double baseAttackRate;
+    protected int upgradeCount;
 
-//should make it so that there is a chance for each item to drop has a certain rareity its like theres a chance each time a item drops
-//could make it so that there is no different armors and make it so that they increase a certain set you have depending on upgrades
-// Interface for Armor
+    // Constructor
+    public Item(String name, double baseDamage, double baseAttackRate, int upgradeCount) {
+        this.name = name;
+        this.baseDamage = baseDamage;
+        this.baseAttackRate = baseAttackRate;
+        this.upgradeCount = upgradeCount;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setUpgradeCount(int upgradeCount) {
+        this.upgradeCount = upgradeCount;
+    }
+}
+
+// Interface for Weapons
+interface Weapons {
+    double damage();      // Calculate damage
+    double attackRate();  // Calculate attack rate
+}
+
+// Armor Interface
 interface Armor {
     double Defense(double baseDefense); // Calculate defense
     double HpUp(double baseHpUp);       // Calculate HPUp
 }
 
-// Armor class that calculates values based on upgrades
-public class ArmourValues implements Armor {
-    private int upgradeCount; // Number of upgrades applied
+// Class for Armor Upgrades
+class ArmourValues implements Armor {
+    public int upgradeCount;
 
-    // Constructor to set the number of upgrades
+    // Constructor
     public ArmourValues(int upgradeCount) {
         this.upgradeCount = upgradeCount;
     }
 
-    // Calculate Defense value
     @Override
     public double Defense(double baseDefense) {
-        return baseDefense * (upgradeCount); // Equation as provided
+        return baseDefense * upgradeCount;
     }
 
-    // Calculate HPUp value
     @Override
     public double HpUp(double baseHpUp) {
-        return baseHpUp * (upgradeCount); // Equation as provided
+        return baseHpUp * upgradeCount;
     }
 
-    // Getter for upgrades (optional, for debugging or future use)
     public int getUpgradeCount() {
         return upgradeCount;
     }
 }
 
-interface Weapons () {
-    double damage();
-    double AttackRate();
+// Upgrade Class for Dropped Items
+class Upgrade {
+    private static int numWaves = 1; // Number of waves
+
+    // Method to increase wave count
+    public static void increaseWaveCount() {
+        numWaves++;
+    }
+
+    // Calculate drop chance
+    public double getDropChance() {
+        return (1.0 / 100) * numWaves;
+    }
 }
 
-//make it so that in the beginning of the game they decide what weapon they use this is simpler
-// make it so that each damage equation is similar to equation values above for each
-// Bow class
-
+// Bow Class
 class Bow extends Item {
     public Bow(int upgradeCount) {
         super("Bow", 40, 3, upgradeCount);
@@ -51,16 +83,16 @@ class Bow extends Item {
 
     @Override
     public double damage() {
-        return baseDamage + (upgradeCount * 5); // Damage increases by 5 per upgrade
+        return baseDamage + (upgradeCount * 5);
     }
 
     @Override
     public double attackRate() {
-        return baseAttackRate + (upgradeCount * 0.2); // Attack rate increases slightly per upgrade
+        return baseAttackRate + (upgradeCount * 1.5);
     }
 }
 
-
+// Crossbow Class
 class Crossbow extends Item {
     public Crossbow(int upgradeCount) {
         super("Crossbow", 50, 7, upgradeCount);
@@ -68,16 +100,16 @@ class Crossbow extends Item {
 
     @Override
     public double damage() {
-        return baseDamage + (upgradeCount * 7); // Damage increases by 7 per upgrade
+        return baseDamage + (upgradeCount * 7);
     }
 
     @Override
     public double attackRate() {
-        return baseAttackRate - (upgradeCount * 0.1); // Attack rate slightly decreases per upgrade
+        return baseAttackRate + (upgradeCount * 1.3);
     }
 }
 
-
+// Dagger Class
 class Dagger extends Item {
     public Dagger(int upgradeCount) {
         super("Dagger", 30, 2, upgradeCount);
@@ -85,16 +117,16 @@ class Dagger extends Item {
 
     @Override
     public double damage() {
-        return baseDamage + (upgradeCount * 3); // Damage increases by 3 per upgrade
+        return baseDamage + (upgradeCount * 3);
     }
 
     @Override
     public double attackRate() {
-        return baseAttackRate + (upgradeCount * 0.5); // Attack rate increases significantly per upgrade
+        return baseAttackRate + (upgradeCount * 1.8);
     }
 }
 
-
+// Sword Class
 class Sword extends Item {
     public Sword(int upgradeCount) {
         super("Sword", 70, 10, upgradeCount);
@@ -102,16 +134,16 @@ class Sword extends Item {
 
     @Override
     public double damage() {
-        return baseDamage + (upgradeCount * 10); // Damage increases by 10 per upgrade
+        return baseDamage + (upgradeCount * 10);
     }
 
     @Override
     public double attackRate() {
-        return baseAttackRate; // Attack rate remains constant
+        return baseAttackRate;
     }
 }
 
-
+// GreatSword Class
 class GreatSword extends Item {
     public GreatSword(int upgradeCount) {
         super("GreatSword", 100, 15, upgradeCount);
@@ -119,12 +151,13 @@ class GreatSword extends Item {
 
     @Override
     public double damage() {
-        return baseDamage + (upgradeCount * 15); // Damage increases by 15 per upgrade
+        return baseDamage + (upgradeCount * 15);
     }
 
     @Override
     public double attackRate() {
-        return baseAttackRate - (upgradeCount * 0.3); // Attack rate decreases per upgrade
+        return baseAttackRate + (upgradeCount * 1.1);
     }
 }
+
 
