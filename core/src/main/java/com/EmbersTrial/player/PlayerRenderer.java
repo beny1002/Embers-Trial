@@ -16,19 +16,25 @@ public class PlayerRenderer {
     }
 
     public void render(SpriteBatch batch, Vector2 position) {
-        if (playerTexture != null) {
-            //draw the texture scaled to 4x its original size
-            batch.draw(playerTexture, position.x, position.y, originalWidth * 4, originalHeight * 4);
+        if (playerTexture == null || playerTexture.getTextureObjectHandle() == 0) {
+            System.err.println("Invalid texture being rendered!");
+            return;
         }
+        batch.draw(playerTexture, position.x, position.y, originalWidth * 4, originalHeight * 4);
     }
 
+
     public void setTexture(Texture newTexture) {
-        if (playerTexture != null) {
-            playerTexture.dispose(); // Dispose of the old texture
+//        if (playerTexture != null) {
+//            playerTexture.dispose(); // Dispose of the old texture
+//        }
+        if (newTexture == null || newTexture.getTextureObjectHandle() == 0) {
+            System.err.println("Invalid texture passed to setTexture!");
+            return;
         }
-        playerTexture = newTexture; // Assign the new texture
-        originalWidth = newTexture.getWidth();
-        originalHeight = newTexture.getHeight();
+        playerTexture = newTexture; // Update reference without disposal
+//        originalWidth = newTexture.getWidth();
+//        originalHeight = newTexture.getHeight();
     }
 
     public void dispose() {
