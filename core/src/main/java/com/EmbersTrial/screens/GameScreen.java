@@ -48,7 +48,7 @@ public class GameScreen {
 
         // TESTING SETUP
         try {
-            playerSpriteSheet = new Texture(Gdx.files.internal("spritesheet.png"));
+            playerSpriteSheet = new Texture(Gdx.files.internal("player_stand_front.png"));
             player = new Player(playerSpriteSheet);
             Gdx.app.log("GameScreen", "Player sprite sheet loaded successfully");
         } catch (Exception e) {
