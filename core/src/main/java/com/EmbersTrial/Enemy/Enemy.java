@@ -1,6 +1,10 @@
 package com.EmbersTrial.Enemy;
-//basic enemy stats now just need to make it as the waves increase
+
+// Basic enemy stats now scale with waves
 public class Enemy {
+    // Track the number of waves to dynamically increase stats
+    private double numWaves = 1;
+
     // Base stats for the enemy
     private String name;
     private double hp;
@@ -9,13 +13,30 @@ public class Enemy {
     private double attackSpeed;
 
     // Constructor for setting stats
-    public Enemy(String name, double hp, double defense, double damage, double attackSpeed) {
+    public Enemy(String name, double baseHp, double baseDefense, double baseDamage, double baseAttackSpeed) {
         this.name = name;
-        this.hp = hp;
-        this.defense = defense;
-        this.damage = damage;
-        this.attackSpeed = attackSpeed;
+        this.hp = baseHp + (numWaves * 10); // Increase HP with waves
+        this.defense = baseDefense + (numWaves * 2); // Increase Defense with waves
+        this.damage = baseDamage + (numWaves * 3); // Increase Damage with waves
+        this.attackSpeed = baseAttackSpeed + (numWaves * 0.1); // Slightly increase Attack Speed with waves
     }
+
+    // Increment wave count and update scaling factor
+    public double incrementWaves() {
+        numWaves++;
+        return numWaves;
+    }
+
+    // Apply damage to this enemy's HP
+    public void takeDamage(double attackDamage, double defense) {
+        double effectiveDamage = Math.max(attackDamage - defense, 0); // No negative damage
+        hp -= effectiveDamage;
+        if (hp < 0) {
+            hp = 0; // Ensure HP doesn't go below 0
+        }
+        System.out.println(name + " took " + effectiveDamage + " damage. Remaining HP: " + hp);
+    }
+
 
     // Inner classes for specific enemy types with predefined stats
     public static class Goblin extends Enemy {
