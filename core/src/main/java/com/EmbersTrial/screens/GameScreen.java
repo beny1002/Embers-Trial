@@ -135,11 +135,14 @@ public class GameScreen {
         // clear the screen
         ScreenUtils.clear(0, 0, 0, 1);
 
+        orthoRenderer.setView(camera);
+        orthoRenderer.render();
+
         camera.position.set(player.getPosition().x + 2 * (player.getPlayerWidth() / 2), player.getPosition().y + 2 * (player.getPlayerHeight() / 2), 0);
         camera.update();
-        System.out.println(player.getPosition().x + " " + player.getPosition().y);
-        System.out.println(player.getPosition().y + " "+ player.getPlayerHeight());
-        System.out.println((player.getPosition().x + player.getPlayerWidth() / 2) + " " + (player.getPosition().y + player.getPlayerHeight() / 2));
+        //System.out.println(player.getPosition().x + " " + player.getPosition().y);
+        //System.out.println(player.getPosition().y + " "+ player.getPlayerHeight());
+        //System.out.println((player.getPosition().x + player.getPlayerWidth() / 2) + " " + (player.getPosition().y + player.getPlayerHeight() / 2));
         batch.setProjectionMatrix(camera.combined);
 
 
@@ -148,8 +151,6 @@ public class GameScreen {
             player.update(Gdx.graphics.getDeltaTime());
         }
 
-        orthoRenderer.setView(camera);
-        orthoRenderer.render();
         batch.begin();
         // render the tile map
         //tileMap.render(batch, camera);
