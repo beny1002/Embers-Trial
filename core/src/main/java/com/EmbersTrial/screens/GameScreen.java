@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -60,12 +61,17 @@ public class GameScreen {
         // initialize tile map
         //tileMap = new TileMap("untitled.png");
         tiledmap = new TmxMapLoader().load("untitled.tmx");
-        orthoRenderer = new OrthogonalTiledMapRenderer(tiledmap, 3f);
-        //tileMap.generateSampleMap(); // generate a sample map
-        //ye
+        orthoRenderer = new OrthogonalTiledMapRenderer(tiledmap, 4f);
+
+        float mapWidth = tiledmap.getProperties().get("width", Integer.class) * 128; //32 * x (the unit scale from orthoRenderer)
+        float mapHeight = tiledmap.getProperties().get("height", Integer.class) * 128; //32 * y (the unit scale from orthoRenderer)
+        camera.position.set(mapWidth / 2, mapHeight / 2, 0);
+        float mapCenterX = mapWidth / 2;
+        float mapCenterY = mapHeight / 2;
 
         // initialize player
-        player = new Player(new Texture(Gdx.files.internal("player_stand_front.png")));
+        player = new Player(new Texture(Gdx.files.internal("player_stand_front.png")),(TiledMapTileLayer) tiledmap.getLayers().get(0));
+        player.getPosition().set(mapCenterX - (50), mapCenterY - (400)); //X = mapCenterX - 50 for very center of x
 
         // initialize pause menu
         initPauseMenu();
@@ -140,11 +146,8 @@ public class GameScreen {
 
         camera.position.set(player.getPosition().x + 2 * (player.getPlayerWidth() / 2), player.getPosition().y + 2 * (player.getPlayerHeight() / 2), 0);
         camera.update();
-        //System.out.println(player.getPosition().x + " " + player.getPosition().y);
-        //System.out.println(player.getPosition().y + " "+ player.getPlayerHeight());
-        //System.out.println((player.getPosition().x + player.getPlayerWidth() / 2) + " " + (player.getPosition().y + player.getPlayerHeight() / 2));
-        batch.setProjectionMatrix(camera.combined);
 
+        batch.setProjectionMatrix(camera.combined);
 
         if (!isPaused) {
             // update game logic

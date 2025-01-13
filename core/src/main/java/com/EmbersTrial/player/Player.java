@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 
 public class Player {
@@ -37,8 +38,11 @@ public class Player {
     private BitmapFont font;
     private GlyphLayout layout;
 
-    public Player(Texture playerTexture) {
+    private TiledMapTileLayer collisionLayer;
+
+    public Player(Texture playerTexture, TiledMapTileLayer  collisionLayer) {
         this.texture = playerTexture;
+        this.collisionLayer = collisionLayer;
 
         renderer = new PlayerRenderer(texture);
         position = new Vector2(100, 100);
@@ -212,7 +216,36 @@ public class Player {
     private void movePlayer(float deltaTime) {
         float currentSpeed = isBoosting ? speed * boostMultiplier : speed;
         direction.nor();
-        position.add(direction.scl(currentSpeed * deltaTime));
+        //position.add(direction.scl(currentSpeed * deltaTime));
+
+        Vector2 newPos = new Vector2(position.x, position.y).add(direction.scl(currentSpeed * deltaTime));
+
+        // Check for collisions before moving
+        if (!isColliding(newPos)) {
+            position.set(newPos);
+        }
+
+    }
+
+    private boolean isColliding(Vector2 newPos) {
+        float tileWidth = collisionLayer.getTileWidth();
+        float tileHeight = collisionLayer.getTileHeight();
+
+        int tileX = (int) (newPos.x / tileWidth);
+        int tileY = (int) (newPos.y / tileHeight);
+
+        // https://stackoverflow.com/questions/20063281/libgdx-collision-detection-with-tiledmap
+        // https://hg.sr.ht/~dermetfan/tiledmapgame/rev/90747217a92e3b14ca00ee6927221d0138ee5430#TiledMapGame/src/net/dermetfan/tiledMapGame/TiledMapGame.java
+        if (tileX >= 0 && tileX < collisionLayer.getWidth() && tileY >= 0 && tileY < collisionLayer.getHeight()) {
+            TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
+            if (cell != null && cell.getTile().getProperties().containsKey("blocked")) {
+                System.out.print("colliding");
+                return true; // Collision with blocked tile
+            }
+        }
+        System.out.print("asd");
+        return false; // No collision
+
     }
 
     public void render(SpriteBatch batch) {
