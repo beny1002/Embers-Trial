@@ -7,7 +7,7 @@ public class Enemy {
 
     // Base stats for the enemy
     private String name;
-    private double hp;
+    private double hpUp;
     private double defense;
     private double damage;
     private double attackSpeed;
@@ -15,7 +15,7 @@ public class Enemy {
     // Constructor for setting stats
     public Enemy(String name, double baseHp, double baseDefense, double baseDamage, double baseAttackSpeed) {
         this.name = name;
-        this.hp = baseHp + (numWaves * 10); // Increase HP with waves
+        this.hpUp = baseHp + (numWaves * 10); // Increase HP with waves
         this.defense = baseDefense + (numWaves * 2); // Increase Defense with waves
         this.damage = baseDamage + (numWaves * 3); // Increase Damage with waves
         this.attackSpeed = baseAttackSpeed + (numWaves * 0.1); // Slightly increase Attack Speed with waves
@@ -30,11 +30,11 @@ public class Enemy {
     // Apply damage to this enemy's HP
     public void takeDamage(double attackDamage, double defense) {
         double effectiveDamage = Math.max(attackDamage - defense, 0); // No negative damage
-        hp -= effectiveDamage;
-        if (hp < 0) {
-            hp = 0; // Ensure HP doesn't go below 0
+        hpUp -= effectiveDamage;
+        if (hpUp < 0) {
+            hpUp = 0; // Ensure HP doesn't go below 0
         }
-        System.out.println(name + " took " + effectiveDamage + " damage. Remaining HP: " + hp);
+        System.out.println(name + " took " + effectiveDamage + " damage. Remaining HP: " + hpUp);
     }
 
 

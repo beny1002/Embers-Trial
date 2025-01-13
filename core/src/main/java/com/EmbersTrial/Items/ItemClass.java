@@ -1,7 +1,26 @@
 package com.EmbersTrial.Items;
+import java.util.Random;
 //the base value of each Item is the beginning now just change each item value to be a variable and create new items that just implement the methods
 // Abstract class Item
 public class ItemClass {
+    public double hpUP = 100;// this is a placeholder hp thing
+
+    class Drops {
+        public double Drop(double Droprate, double hpUp) {//The Drop rate will increase perwave and then when they get that item the droprate will reset
+            Random random=new Random();
+            double currentHealth = hpUp;
+            
+        }
+    }
+
+    class potion {
+        public potion(double hpUP) {
+            double hpUp = 100;//place holder for max hp
+            double heal = hpUp * 0.2;
+            hpUp = hpUp + heal; //this is just a place holder for heals calc
+        }
+    }
+
     abstract class Item implements Weapons {
         protected String name;
         protected double baseDamage;
@@ -95,6 +114,24 @@ public class ItemClass {
         }
     }
 
+    class pewpew extends Bow { // new bow weapon
+        public pewpew(int upgradeCount) {
+            super(upgradeCount);
+            this.name = "pewpew";
+            this.baseDamage = 60;
+            this.baseAttackRate = 2.5;
+        }
+    }
+
+    class Bigpewpew extends Bow { // new bow weapon will change stats for the weapon later
+        public Bigpewpew(int upgradeCount) {
+            super(upgradeCount);
+            this.name = "Bigpewpew";
+            this.baseDamage = 60;
+            this.baseAttackRate = 2.5;
+        }
+    }
+
     // Crossbow Class
     class Crossbow extends Item {
         public Crossbow(int upgradeCount) {
@@ -162,6 +199,7 @@ public class ItemClass {
             return baseAttackRate + (upgradeCount * 1.1);
         }
     }
+
 }
 
 
