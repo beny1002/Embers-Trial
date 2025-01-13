@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -38,6 +41,8 @@ public class GameScreen {
 
     // tilemap
     private TileMap tileMap;
+    private TiledMap tiledmap;
+    private OrthogonalTiledMapRenderer orthoRenderer;
 
     public GameScreen(Main mainApp) {
         this.mainApp = mainApp;
@@ -53,8 +58,11 @@ public class GameScreen {
         batch = new SpriteBatch();
 
         // initialize tile map
-        tileMap = new TileMap("tiles.png");
-        tileMap.generateSampleMap(); // generate a sample map
+        //tileMap = new TileMap("untitled.png");
+        tiledmap = new TmxMapLoader().load("untitled.tmx");
+        orthoRenderer = new OrthogonalTiledMapRenderer(tiledmap, 3f);
+        //tileMap.generateSampleMap(); // generate a sample map
+        //ye
 
         // initialize player
         player = new Player(new Texture(Gdx.files.internal("player_stand_front.png")));
@@ -94,6 +102,7 @@ public class GameScreen {
 
         // exit to main menu button
         TextButton exitButton = new TextButton("Exit to Main Menu", skin);
+
         exitButton.addListener(event -> {
             if (exitButton.isPressed()) {
                 mainApp.setMainMenuScreen();
@@ -105,6 +114,7 @@ public class GameScreen {
         pauseTable.add(resumeButton).width(200).height(50).padBottom(10);
         pauseTable.row();
         pauseTable.add(exitButton).width(200).height(50);
+
     }
 
     public void render() {
@@ -125,18 +135,25 @@ public class GameScreen {
         // clear the screen
         ScreenUtils.clear(0, 0, 0, 1);
 
-        camera.position.set(player.getPosition().x, player.getPosition().y, 0);
+        camera.position.set(player.getPosition().x + 2 * (player.getPlayerWidth() / 2), player.getPosition().y + 2 * (player.getPlayerHeight() / 2), 0);
         camera.update();
+        System.out.println(player.getPosition().x + " " + player.getPosition().y);
+        System.out.println(player.getPosition().y + " "+ player.getPlayerHeight());
+        System.out.println((player.getPosition().x + player.getPlayerWidth() / 2) + " " + (player.getPosition().y + player.getPlayerHeight() / 2));
         batch.setProjectionMatrix(camera.combined);
+
 
         if (!isPaused) {
             // update game logic
             player.update(Gdx.graphics.getDeltaTime());
         }
 
+        orthoRenderer.setView(camera);
+        orthoRenderer.render();
         batch.begin();
         // render the tile map
-        tileMap.render(batch, camera);
+        //tileMap.render(batch, camera);
+
 
         // render the player
         player.render(batch);

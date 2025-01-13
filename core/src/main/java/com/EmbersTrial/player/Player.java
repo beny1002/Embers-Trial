@@ -39,6 +39,7 @@ public class Player {
 
     public Player(Texture playerTexture) {
         this.texture = playerTexture;
+
         renderer = new PlayerRenderer(texture);
         position = new Vector2(100, 100);
         direction = new Vector2(0, 0);
@@ -48,6 +49,15 @@ public class Player {
         font.setColor(Color.RED); // set the font color to red
         layout = new GlyphLayout(); // used to calculate text width/height
         setAnimations();
+
+    }
+
+    public int getPlayerWidth(){
+        return standingBack.getWidth();
+    }
+
+    public int getPlayerHeight(){
+        return standingBack.getHeight();
     }
 
     public void setAnimations() {
@@ -219,7 +229,6 @@ public class Player {
     }
 
     public Vector2 getPosition() {
-
         return position;
     }
 
