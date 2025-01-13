@@ -26,53 +26,52 @@ public class MainMenuScreen {
     private Main mainApp;
     private Skin skin;
     private Music mainMenuMusic;
-    private Actor blackOverlay; // programmatically created black overlay
-    private Texture whitePixelTexture; // texture for the black overlay
+    private Actor blackOverlay;
+    private Texture whitePixelTexture;
 
     public MainMenuScreen(Main mainApp) {
         this.mainApp = mainApp;
 
-        //setup assets
+        // Setup assets
         viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 
         backgroundTexture = new Texture(Gdx.files.internal("background.png"));
         titleTexture = new Texture(Gdx.files.internal("Logos/gameLogo.png"));
-        skin = new Skin(Gdx.files.internal("metal-ui.json")); // reload the skin
+        skin = new Skin(Gdx.files.internal("metal-ui.json"));
 
-        //load and configure background music
-        mainMenuMusic = Gdx.audio.newMusic(Gdx.files.internal("mainmenucrackle.mp3"));
+        // Load and configure background music
+        mainMenuMusic = Gdx.audio.newMusic(Gdx.files.internal("dungeon ambiance.wav"));
         mainMenuMusic.setLooping(true);
-        mainMenuMusic.setVolume(mainApp.getPreferences().getFloat("volume", 0.5f)); // set initial volume
+        mainMenuMusic.setVolume(mainApp.getPreferences().getFloat("volume", 0.5f));
         mainMenuMusic.play();
 
-        //create a white pixel texture
+        // Create a white pixel texture
         createWhitePixelTexture();
 
         setupUI();
-        setupBlackOverlay(); // programmatically create the black overlay
+        setupBlackOverlay();
     }
 
     private void createWhitePixelTexture() {
-        //create a 1x1 white pixel texture using Pixmap
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
         whitePixelTexture = new Texture(pixmap);
-        pixmap.dispose(); // dispose of pixmap after use
+        pixmap.dispose();
     }
 
     private void setupBlackOverlay() {
         blackOverlay = new Actor() {
             @Override
             public void draw(Batch batch, float parentAlpha) {
-                batch.setColor(0, 0, 0, getColor().a); // black with adjustable alpha
+                batch.setColor(0, 0, 0, getColor().a);
                 batch.draw(whitePixelTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
-                batch.setColor(1, 1, 1, 1); // reset the batch color
+                batch.setColor(1, 1, 1, 1);
             }
         };
-        blackOverlay.setColor(0, 0, 0, 0); // fully transparent initially
+        blackOverlay.setColor(0, 0, 0, 0);
         stage.addActor(blackOverlay);
     }
 
@@ -81,87 +80,98 @@ public class MainMenuScreen {
         mainMenu.setFillParent(true);
         stage.addActor(mainMenu);
 
-        //title
+        // Title
         com.badlogic.gdx.scenes.scene2d.ui.Image gameTitleImage = new com.badlogic.gdx.scenes.scene2d.ui.Image(titleTexture);
         mainMenu.add(gameTitleImage)
-            .width(viewport.getWorldWidth() * 0.5f)
-            .height(viewport.getWorldHeight() * 0.2f)
-            .spaceBottom(20);
+            .width(viewport.getWorldWidth() * 0.7f)
+            .height(viewport.getWorldHeight() * 0.25f)
+            .spaceBottom(30);
         mainMenu.row();
 
-        //start game button
-        ImageButton startButton = new ImageButton(
-            new TextureRegionDrawable(new Texture(Gdx.files.internal("mainMenuAssets/start_idle.png"))),
-            new TextureRegionDrawable(new Texture(Gdx.files.internal("mainMenuAssets/start_hover.png")))
+        // Start game button
+        ImageButton startButton = createCustomButton(
+            "start_button_bright.png",
+            "start_button_hover.png",
+            2.0f,
+            this::fadeToCutsceneScreen
         );
-        startButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Start button clicked");
-
-                // create a black overlay for fade-out
-                Actor fadeOverlay = new Actor() {
-                    @Override
-                    public void draw(Batch batch, float parentAlpha) {
-                        batch.setColor(0, 0, 0, getColor().a); // black with adjustable alpha
-                        batch.draw(whitePixelTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
-                        batch.setColor(1, 1, 1, 1); // reset batch color
-                    }
-                };
-                fadeOverlay.setColor(0, 0, 0, 0); // initially transparent
-                fadeOverlay.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
-                fadeOverlay.setPosition(0, 0);
-                stage.addActor(fadeOverlay);
-
-                // fade to black and delay before switching to cutscene screen
-                fadeOverlay.addAction(Actions.sequence(
-                    Actions.fadeIn(1f), // fade in over 1 second
-                    Actions.run(() -> {
-                        System.out.println("Transitioning to CutsceneScreen");
-                        mainApp.setCutsceneScreen(); // switch to cutscene screen
-                    })
-                ));
-            }
-        });
         mainMenu.add(startButton)
-            .width(208)
-            .height(139)
-            .spaceBottom(10);
+            .width(250) // Button hitbox width
+            .height(120) // Button hitbox height
+            .spaceBottom(15);
         mainMenu.row();
 
-        //options button
-        ImageButton optionButton = new ImageButton(
-            new TextureRegionDrawable(new Texture(Gdx.files.internal("mainMenuAssets/options_idle.png"))),
-            new TextureRegionDrawable(new Texture(Gdx.files.internal("mainMenuAssets/options_hover.png")))
-        );
-        optionButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
+        // Options button
+        ImageButton optionButton = createCustomButton(
+            "options_button_bright.png",
+            "options_button_hover.png",
+            2.0f,
+            () -> {
                 OptionsPage optionsMenu = new OptionsPage(stage, skin, mainMenu, mainMenuMusic);
                 optionsMenu.showOptionsPage();
             }
-        });
+        );
         mainMenu.add(optionButton)
-            .width(208)
-            .height(139)
-            .spaceBottom(10);
+            .width(250)
+            .height(120)
+            .spaceBottom(15);
         mainMenu.row();
 
-        //exit button
-        ImageButton exitButton = new ImageButton(
-            new TextureRegionDrawable(new Texture(Gdx.files.internal("mainMenuAssets/exit_idle.png"))),
-            new TextureRegionDrawable(new Texture(Gdx.files.internal("mainMenuAssets/exit_hover.png")))
+        // Exit button
+        ImageButton exitButton = createCustomButton(
+            "exit_button_bright.png",
+            "exit_button_hover.png",
+            2.0f,
+            Gdx.app::exit
         );
-        exitButton.addListener(new ClickListener() {
+        mainMenu.add(exitButton)
+            .width(250)
+            .height(120)
+            .spaceBottom(15);
+    }
+
+    private ImageButton createCustomButton(String normalTexture, String hoverTexture, float scaleFactor, Runnable onClickAction) {
+        TextureRegionDrawable normalDrawable = new TextureRegionDrawable(new Texture(Gdx.files.internal(normalTexture)));
+        TextureRegionDrawable hoverDrawable = new TextureRegionDrawable(new Texture(Gdx.files.internal(hoverTexture)));
+        ImageButton button = new ImageButton(normalDrawable, hoverDrawable);
+
+        // Scale the image inside the button
+        button.getImage().setScale(scaleFactor);
+
+        // Center the image after scaling
+        button.getImageCell().pad(0).center();
+        button.getImage().setOrigin(button.getImage().getWidth() / 2, button.getImage().getHeight() / 2);
+
+        // Add click listener
+        button.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                onClickAction.run();
+                return true;
             }
         });
-        mainMenu.add(exitButton)
-            .width(208)
-            .height(139)
-            .spaceBottom(10);
+
+        return button;
+    }
+
+    private void fadeToCutsceneScreen() {
+        Actor fadeOverlay = new Actor() {
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                batch.setColor(0, 0, 0, getColor().a);
+                batch.draw(whitePixelTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+                batch.setColor(1, 1, 1, 1);
+            }
+        };
+        fadeOverlay.setColor(0, 0, 0, 0);
+        fadeOverlay.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        fadeOverlay.setPosition(0, 0);
+        stage.addActor(fadeOverlay);
+
+        fadeOverlay.addAction(Actions.sequence(
+            Actions.fadeIn(1f),
+            Actions.run(mainApp::setCutsceneScreen)
+        ));
     }
 
     public void render() {
@@ -181,8 +191,8 @@ public class MainMenuScreen {
         stage.dispose();
         backgroundTexture.dispose();
         titleTexture.dispose();
-        skin.dispose(); // dispose the skin
-        mainMenuMusic.dispose(); // dispose the music
-        whitePixelTexture.dispose(); // dispose the white pixel texture
+        skin.dispose();
+        mainMenuMusic.dispose();
+        whitePixelTexture.dispose();
     }
 }
