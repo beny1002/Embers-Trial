@@ -9,7 +9,7 @@ public class ItemClass {
         public double Drop(double Droprate, double hpUp) {//The Drop rate will increase perwave and then when they get that item the droprate will reset
             Random random=new Random();
             double currentHealth = hpUp;
-            
+
         }
     }
 
