@@ -2,9 +2,15 @@ package com.EmbersTrial.screens;
 
 import com.EmbersTrial.Main;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -19,6 +25,9 @@ public class MainMenuScreen {
     private FitViewport viewport;
     private Main mainApp;
     private Skin skin;
+    private Music mainMenuMusic;
+    private Actor blackOverlay; // programmatically created black overlay
+    private Texture whitePixelTexture; // texture for the black overlay
 
     public MainMenuScreen(Main mainApp) {
         this.mainApp = mainApp;
@@ -32,7 +41,39 @@ public class MainMenuScreen {
         titleTexture = new Texture(Gdx.files.internal("Logos/gameLogo.png"));
         skin = new Skin(Gdx.files.internal("metal-ui.json")); // reload the skin
 
+        //load and configure background music
+        mainMenuMusic = Gdx.audio.newMusic(Gdx.files.internal("mainmenucrackle.mp3"));
+        mainMenuMusic.setLooping(true);
+        mainMenuMusic.setVolume(mainApp.getPreferences().getFloat("volume", 0.5f)); // set initial volume
+        mainMenuMusic.play();
+
+        //create a white pixel texture
+        createWhitePixelTexture();
+
         setupUI();
+        setupBlackOverlay(); // programmatically create the black overlay
+    }
+
+    private void createWhitePixelTexture() {
+        //create a 1x1 white pixel texture using Pixmap
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        whitePixelTexture = new Texture(pixmap);
+        pixmap.dispose(); // dispose of pixmap after use
+    }
+
+    private void setupBlackOverlay() {
+        blackOverlay = new Actor() {
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                batch.setColor(0, 0, 0, getColor().a); // black with adjustable alpha
+                batch.draw(whitePixelTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+                batch.setColor(1, 1, 1, 1); // reset the batch color
+            }
+        };
+        blackOverlay.setColor(0, 0, 0, 0); // fully transparent initially
+        stage.addActor(blackOverlay);
     }
 
     private void setupUI() {
@@ -56,13 +97,36 @@ public class MainMenuScreen {
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                mainApp.setCutsceneScreen(); // transition to cutscene screen
+                System.out.println("Start button clicked");
+
+                // create a black overlay for fade-out
+                Actor fadeOverlay = new Actor() {
+                    @Override
+                    public void draw(Batch batch, float parentAlpha) {
+                        batch.setColor(0, 0, 0, getColor().a); // black with adjustable alpha
+                        batch.draw(whitePixelTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+                        batch.setColor(1, 1, 1, 1); // reset batch color
+                    }
+                };
+                fadeOverlay.setColor(0, 0, 0, 0); // initially transparent
+                fadeOverlay.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+                fadeOverlay.setPosition(0, 0);
+                stage.addActor(fadeOverlay);
+
+                // fade to black and delay before switching to cutscene screen
+                fadeOverlay.addAction(Actions.sequence(
+                    Actions.fadeIn(1f), // fade in over 1 second
+                    Actions.run(() -> {
+                        System.out.println("Transitioning to CutsceneScreen");
+                        mainApp.setCutsceneScreen(); // switch to cutscene screen
+                    })
+                ));
             }
         });
         mainMenu.add(startButton)
-            .width(208) // original button width
-            .height(139) // original button height
-            .spaceBottom(10); // reduced spacing
+            .width(208)
+            .height(139)
+            .spaceBottom(10);
         mainMenu.row();
 
         //options button
@@ -73,15 +137,14 @@ public class MainMenuScreen {
         optionButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // instantiate and display options menu
-                OptionsPage optionsMenu = new OptionsPage(stage, skin, mainMenu);
+                OptionsPage optionsMenu = new OptionsPage(stage, skin, mainMenu, mainMenuMusic);
                 optionsMenu.showOptionsPage();
             }
         });
         mainMenu.add(optionButton)
-            .width(208) // original button width
-            .height(139) // original button height
-            .spaceBottom(10); // reduced spacing
+            .width(208)
+            .height(139)
+            .spaceBottom(10);
         mainMenu.row();
 
         //exit button
@@ -96,8 +159,8 @@ public class MainMenuScreen {
             }
         });
         mainMenu.add(exitButton)
-            .width(208) // original button width
-            .height(139) // original button height
+            .width(208)
+            .height(139)
             .spaceBottom(10);
     }
 
@@ -119,5 +182,7 @@ public class MainMenuScreen {
         backgroundTexture.dispose();
         titleTexture.dispose();
         skin.dispose(); // dispose the skin
+        mainMenuMusic.dispose(); // dispose the music
+        whitePixelTexture.dispose(); // dispose the white pixel texture
     }
 }

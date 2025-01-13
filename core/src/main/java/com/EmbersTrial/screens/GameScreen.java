@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -22,37 +21,33 @@ public class GameScreen {
     private OrthographicCamera camera;
     private FitViewport viewport;
 
-    //pause-related variables
+    // Pause-related variables
     private boolean isPaused = false;
     private Stage pauseStage;
     private Skin skin;
-    private float pauseCooldown = 0.2f; //debounce time for ESC key
+    private float pauseCooldown = 0.2f; // Debounce time for ESC key
     private float pauseCooldownTimer = 0f;
-    private ShapeRenderer shapeRenderer; //used to render the transparent overlay
 
-    //player-related variables
+    // Player-related variables
     private Player player;
     private Texture playerSpriteSheet;
     private Main mainApp;
-
-    //track if the screen has been disposed
-    private boolean disposed = false;
+    private boolean disposed = false; // Prevent use of disposed resources
 
     public GameScreen(Main mainApp) {
         this.mainApp = mainApp;
 
-        //camera and viewport setup
+        // Camera and viewport setup
         camera = new OrthographicCamera();
         viewport = new FitViewport(1920, 1080, camera);
         camera.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
         camera.update();
 
-        //stage and SpriteBatch setup
+        // Stage and SpriteBatch setup
         stage = new Stage(viewport);
         batch = new SpriteBatch();
-        shapeRenderer = new ShapeRenderer();
 
-        //load background texture
+        // Load background texture
         try {
             backgroundTexture = new Texture(Gdx.files.internal("map.png"));
             Gdx.app.log("GameScreen", "map.png loaded successfully");
@@ -60,7 +55,7 @@ public class GameScreen {
             Gdx.app.error("GameScreen", "Failed to load map.png", e);
         }
 
-        //initialize player
+        // Initialize player
         try {
             playerSpriteSheet = new Texture(Gdx.files.internal("player_stand_front.png"));
             player = new Player(playerSpriteSheet);
@@ -69,7 +64,7 @@ public class GameScreen {
             Gdx.app.error("GameScreen", "Failed to initialize player", e);
         }
 
-        //initialize pause menu
+        // Initialize pause menu
         initPauseMenu();
     }
 
@@ -81,23 +76,22 @@ public class GameScreen {
         pauseTable.setFillParent(true);
         pauseStage.addActor(pauseTable);
 
-        //resume button
+        // Resume button
         TextButton resumeButton = new TextButton("Resume", skin);
         resumeButton.addListener(event -> {
             if (resumeButton.isPressed()) {
-                togglePause(false); //unpause the game
-                pauseStage.unfocus(resumeButton); //reset button focus
+                togglePause(false); // Unpause the game
             }
             return true;
         });
 
-        //exit to main menu button
+        // Exit to main menu button
         TextButton exitButton = new TextButton("Exit to Main Menu", skin);
         exitButton.addListener(event -> {
             if (exitButton.isPressed()) {
                 Gdx.app.log("GameScreen", "Exiting to Main Menu...");
-                mainApp.setMainMenuScreen(); //transition to MainMenuScreen
-                dispose(); //clean up resources for GameScreen
+                mainApp.setMainMenuScreen();
+                dispose(); // Dispose resources after transitioning
             }
             return true;
         });
@@ -108,88 +102,70 @@ public class GameScreen {
     }
 
     public void render() {
-        if (disposed) return; //skip rendering if the screen has been disposed
+        if (disposed) {
+            Gdx.app.log("GameScreen", "Render called on a disposed GameScreen. Skipping frame.");
+            return;
+        }
 
-        //update the pause cooldown timer
+        // Update the pause cooldown timer
         if (pauseCooldownTimer > 0) {
             pauseCooldownTimer -= Gdx.graphics.getDeltaTime();
         }
 
-        //handle pause toggle
+        // Handle pause toggle
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE) && pauseCooldownTimer <= 0) {
             togglePause(!isPaused);
-            pauseCooldownTimer = pauseCooldown; //reset cooldown timer
+            pauseCooldownTimer = pauseCooldown; // Reset cooldown timer
         }
 
-        //clear the screen
+        // Clear the screen
         ScreenUtils.clear(0, 0, 0, 1);
 
-        if (isPaused) {
-            //render the game under the transparent overlay
-            renderGame();
-
-            //draw transparent black overlay
-            drawTransparentOverlay();
-
-            //render the pause menu
-            if (pauseStage != null) {
-                pauseStage.act();
-                pauseStage.draw();
-            }
-        } else {
-            //render the game normally
-            renderGame();
-
-            //update game logic
-            updateGameLogic();
-        }
-    }
-
-    private void renderGame() {
-        //update the camera
-        camera.update();
-
-        //render the game
+        // Render the game
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         if (backgroundTexture != null) {
             batch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         }
 
-        //render the player
         if (player != null) {
             player.render(batch);
-        } else {
-            Gdx.app.error("GameScreen", "Player is null during rendering!");
         }
         batch.end();
 
-        //render stage elements
-        stage.act(Gdx.graphics.getDeltaTime());
-        stage.draw();
-    }
-
-    private void updateGameLogic() {
-        //update player and other game logic only when not paused
-        if (player != null) {
+        // Update game logic if not paused
+        if (!isPaused && player != null) {
             player.update(Gdx.graphics.getDeltaTime());
+        }
+
+        // Render the transparent black overlay and pause menu if paused
+        if (isPaused) {
+            renderPauseOverlay();
+            pauseStage.act();
+            pauseStage.draw();
+        } else {
+            // Render stage elements
+            stage.act(Gdx.graphics.getDeltaTime());
+            stage.draw();
         }
     }
 
-    private void drawTransparentOverlay() {
-        Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(new Color(0, 0, 0, 0.5f)); //black with 50% opacity
-        shapeRenderer.rect(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
-        shapeRenderer.end();
-        Gdx.gl.glDisable(Gdx.gl.GL_BLEND);
+    private void renderPauseOverlay() {
+        // Render a transparent black rectangle over the entire screen
+        batch.begin();
+        batch.setColor(0, 0, 0, 0.5f); // Semi-transparent black
+        batch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        batch.end();
+        batch.setColor(Color.WHITE); // Reset color to default
     }
 
     private void togglePause(boolean pause) {
-        if (isPaused == pause) return; //prevent redundant toggles
         isPaused = pause;
-        Gdx.input.setInputProcessor(isPaused ? pauseStage : stage);
+        if (isPaused) {
+            Gdx.input.setInputProcessor(pauseStage); // Set input to pause menu
+        } else {
+            Gdx.input.setInputProcessor(stage); // Return input to the game
+        }
     }
 
     public void resize(int width, int height) {
@@ -197,35 +173,17 @@ public class GameScreen {
     }
 
     public void dispose() {
-        disposed = true; //mark the screen as disposed
+        if (disposed) {
+            Gdx.app.log("GameScreen", "dispose() called on an already disposed GameScreen.");
+            return;
+        }
+        disposed = true;
 
-        if (batch != null) {
-            batch.dispose();
-            batch = null;
-        }
-        if (shapeRenderer != null) {
-            shapeRenderer.dispose();
-            shapeRenderer = null;
-        }
-        if (backgroundTexture != null) {
-            backgroundTexture.dispose();
-            backgroundTexture = null;
-        }
-        if (stage != null) {
-            stage.dispose();
-            stage = null;
-        }
-        if (pauseStage != null) {
-            pauseStage.dispose();
-            pauseStage = null;
-        }
-        if (skin != null) {
-            skin.dispose();
-            skin = null;
-        }
-        if (playerSpriteSheet != null) {
-            playerSpriteSheet.dispose();
-            playerSpriteSheet = null;
-        }
+        if (batch != null) batch.dispose();
+        if (backgroundTexture != null) backgroundTexture.dispose();
+        if (stage != null) stage.dispose();
+        if (pauseStage != null) pauseStage.dispose();
+        if (skin != null) skin.dispose();
+        if (playerSpriteSheet != null) playerSpriteSheet.dispose();
     }
 }
