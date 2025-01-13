@@ -3,6 +3,7 @@ package com.EmbersTrial.screens;
 import com.EmbersTrial.Main;
 import com.EmbersTrial.player.Player;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -15,57 +16,62 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class GameScreen {
-    private Stage stage;
     private SpriteBatch batch;
-    private Texture backgroundTexture;
     private OrthographicCamera camera;
     private FitViewport viewport;
 
-    // Pause-related variables
+    // zoom-related variables
+    private float maxZoom = 3f; // maximum zoom out
+    private float minZoom = 0.5f; // maximum zoom in
+    private float zoomStep = 0.1f; // how much zoom changes per scroll
+
+    // pause-related variables
     private boolean isPaused = false;
     private Stage pauseStage;
     private Skin skin;
-    private float pauseCooldown = 0.2f; // Debounce time for ESC key
+    private float pauseCooldown = 0.2f; // debounce time for ESC key
     private float pauseCooldownTimer = 0f;
 
-    // Player-related variables
+    // player-related variables
     private Player player;
-    private Texture playerSpriteSheet;
     private Main mainApp;
-    private boolean disposed = false; // Prevent use of disposed resources
+
+    // tilemap
+    private TileMap tileMap;
 
     public GameScreen(Main mainApp) {
         this.mainApp = mainApp;
 
-        // Camera and viewport setup
+        // camera and viewport setup
         camera = new OrthographicCamera();
-        viewport = new FitViewport(1920, 1080, camera);
+        viewport = new FitViewport(1920, 1080, camera); // initial viewport
         camera.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
         camera.update();
 
-        // Stage and SpriteBatch setup
-        stage = new Stage(viewport);
+        // spritebatch setup
         batch = new SpriteBatch();
 
-        // Load background texture
-        try {
-            backgroundTexture = new Texture(Gdx.files.internal("map.png"));
-            Gdx.app.log("GameScreen", "map.png loaded successfully");
-        } catch (Exception e) {
-            Gdx.app.error("GameScreen", "Failed to load map.png", e);
-        }
+        // initialize tile map
+        tileMap = new TileMap("tiles.png");
+        tileMap.generateSampleMap(); // generate a sample map
 
-        // Initialize player
-        try {
-            playerSpriteSheet = new Texture(Gdx.files.internal("player_stand_front.png"));
-            player = new Player(playerSpriteSheet);
-            Gdx.app.log("GameScreen", "Player initialized successfully.");
-        } catch (Exception e) {
-            Gdx.app.error("GameScreen", "Failed to initialize player", e);
-        }
+        // initialize player
+        player = new Player(new Texture(Gdx.files.internal("player_stand_front.png")));
 
-        // Initialize pause menu
+        // initialize pause menu
         initPauseMenu();
+
+        // set input processor for scroll zoom
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean scrolled(float amountX, float amountY) {
+                // zoom in or out based on scroll direction
+                camera.zoom += amountY > 0 ? zoomStep : -zoomStep;
+                camera.zoom = Math.max(minZoom, Math.min(maxZoom, camera.zoom)); // clamp zoom
+                camera.update();
+                return true; // event handled
+            }
+        });
     }
 
     private void initPauseMenu() {
@@ -76,22 +82,21 @@ public class GameScreen {
         pauseTable.setFillParent(true);
         pauseStage.addActor(pauseTable);
 
-        // Resume button
+        // resume button
         TextButton resumeButton = new TextButton("Resume", skin);
         resumeButton.addListener(event -> {
             if (resumeButton.isPressed()) {
-                togglePause(false); // Unpause the game
+                togglePause(false); // unpause the game
             }
             return true;
         });
 
-        // Exit to main menu button
+        // exit to main menu button
         TextButton exitButton = new TextButton("Exit to Main Menu", skin);
         exitButton.addListener(event -> {
             if (exitButton.isPressed()) {
-                Gdx.app.log("GameScreen", "Exiting to Main Menu...");
                 mainApp.setMainMenuScreen();
-                dispose(); // Dispose resources after transitioning
+                dispose(); // dispose resources after transitioning
             }
             return true;
         });
@@ -102,69 +107,61 @@ public class GameScreen {
     }
 
     public void render() {
-        if (disposed) {
-            Gdx.app.log("GameScreen", "Render called on a disposed GameScreen. Skipping frame.");
-            return;
-        }
+        // prevent rendering if disposed
+        if (batch == null) return;
 
-        // Update the pause cooldown timer
+        // update the pause cooldown timer
         if (pauseCooldownTimer > 0) {
             pauseCooldownTimer -= Gdx.graphics.getDeltaTime();
         }
 
-        // Handle pause toggle
+        // handle pause toggle
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE) && pauseCooldownTimer <= 0) {
             togglePause(!isPaused);
-            pauseCooldownTimer = pauseCooldown; // Reset cooldown timer
+            pauseCooldownTimer = pauseCooldown; // reset cooldown timer
         }
 
-        // Clear the screen
+        // clear the screen
         ScreenUtils.clear(0, 0, 0, 1);
 
-        // Render the game
         batch.setProjectionMatrix(camera.combined);
-        batch.begin();
-        if (backgroundTexture != null) {
-            batch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
-        }
 
-        if (player != null) {
-            player.render(batch);
-        }
-        batch.end();
-
-        // Update game logic if not paused
-        if (!isPaused && player != null) {
+        if (!isPaused) {
+            // update game logic
             player.update(Gdx.graphics.getDeltaTime());
         }
 
-        // Render the transparent black overlay and pause menu if paused
+        batch.begin();
+        // render the tile map
+        tileMap.render(batch, camera);
+
+        // render the player
+        player.render(batch);
+        batch.end();
+
+        // render pause overlay and menu if paused
         if (isPaused) {
             renderPauseOverlay();
             pauseStage.act();
             pauseStage.draw();
-        } else {
-            // Render stage elements
-            stage.act(Gdx.graphics.getDeltaTime());
-            stage.draw();
         }
     }
 
     private void renderPauseOverlay() {
-        // Render a transparent black rectangle over the entire screen
+        // render a transparent black rectangle over the entire screen
         batch.begin();
-        batch.setColor(0, 0, 0, 0.5f); // Semi-transparent black
-        batch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        batch.setColor(0, 0, 0, 0.5f); // semi-transparent black
+        batch.draw(tileMap.getBlankTile(), 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         batch.end();
-        batch.setColor(Color.WHITE); // Reset color to default
+        batch.setColor(Color.WHITE); // reset color to default
     }
 
     private void togglePause(boolean pause) {
         isPaused = pause;
         if (isPaused) {
-            Gdx.input.setInputProcessor(pauseStage); // Set input to pause menu
+            Gdx.input.setInputProcessor(pauseStage); // set input to pause menu
         } else {
-            Gdx.input.setInputProcessor(stage); // Return input to the game
+            Gdx.input.setInputProcessor(null); // allow player control
         }
     }
 
@@ -173,17 +170,10 @@ public class GameScreen {
     }
 
     public void dispose() {
-        if (disposed) {
-            Gdx.app.log("GameScreen", "dispose() called on an already disposed GameScreen.");
-            return;
-        }
-        disposed = true;
-
         if (batch != null) batch.dispose();
-        if (backgroundTexture != null) backgroundTexture.dispose();
-        if (stage != null) stage.dispose();
+        if (tileMap != null) tileMap.dispose();
+        if (player != null) player.dispose();
         if (pauseStage != null) pauseStage.dispose();
         if (skin != null) skin.dispose();
-        if (playerSpriteSheet != null) playerSpriteSheet.dispose();
     }
 }
