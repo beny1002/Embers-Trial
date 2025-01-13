@@ -126,4 +126,37 @@
    <property name="blocked" value=""/>
   </properties>
  </tile>
+ <tile id="69">
+  <properties>
+   <property name="blocked" value=""/>
+  </properties>
+ </tile>
+ <tile id="80">
+  <properties>
+   <property name="death" value=""/>
+  </properties>
+  <animation>
+   <frame tileid="14" duration="300"/>
+   <frame tileid="26" duration="400"/>
+   <frame tileid="38" duration="600"/>
+   <frame tileid="50" duration="200"/>
+   <frame tileid="14" duration="200"/>
+  </animation>
+ </tile>
+ <tile id="81">
+  <animation>
+   <frame tileid="14" duration="100"/>
+   <frame tileid="26" duration="200"/>
+   <frame tileid="38" duration="600"/>
+   <frame tileid="50" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="92">
+  <animation>
+   <frame tileid="14" duration="600"/>
+   <frame tileid="26" duration="600"/>
+   <frame tileid="38" duration="600"/>
+   <frame tileid="50" duration="600"/>
+  </animation>
+ </tile>
 </tileset>
