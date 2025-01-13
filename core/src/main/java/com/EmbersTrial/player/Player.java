@@ -255,7 +255,7 @@ public class Player {
     }
 
     private boolean isColliding(Vector2 newPos) {
-        float tileWidth = collisionLayer.getTileWidth() * 4f; //by 4 because of scaling
+        float tileWidth = collisionLayer.getTileWidth() * 4f -2; //by 4 because of scaling
         float tileHeight = collisionLayer.getTileHeight() * 4f; // multiply by 4 because of scaling
 
         int tileX = (int) (newPos.x / tileWidth);
