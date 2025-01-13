@@ -10,6 +10,9 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 public class Player {
     private PlayerRenderer renderer;
     private Vector2 position;
@@ -170,26 +173,50 @@ public class Player {
     }
 
     private void handleMovement(float deltaTime, boolean isMoving) {
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.W) && !(Gdx.input.isKeyPressed(Input.Keys.D)) && !(Gdx.input.isKeyPressed(Input.Keys.A))) {
             direction.y += 1;
             lastDirection.set(0, 1);
             isMoving = true;
             handleAnimation(walkingUpFrames, deltaTime);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        }  else if (Gdx.input.isKeyPressed(Input.Keys.S) && !(Gdx.input.isKeyPressed(Input.Keys.A)) && !(Gdx.input.isKeyPressed(Input.Keys.D))) {
             direction.y -= 1;
             lastDirection.set(0, -1);
             isMoving = true;
             handleAnimation(walkingDownFrames, deltaTime);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+        }  else if (Gdx.input.isKeyPressed(Input.Keys.A) && !(Gdx.input.isKeyPressed(Input.Keys.S)) && !(Gdx.input.isKeyPressed(Input.Keys.W))) {
             direction.x -= 1;
             lastDirection.set(-1, 0);
             isMoving = true;
             handleAnimation(walkingLeftFrames, deltaTime);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        }  else if (Gdx.input.isKeyPressed(Input.Keys.D) && !(Gdx.input.isKeyPressed(Input.Keys.S)) && !(Gdx.input.isKeyPressed(Input.Keys.W))) {
             direction.x += 1;
             lastDirection.set(1, 0);
             isMoving = true;
             handleAnimation(walkingRightFrames, deltaTime);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.D) && Gdx.input.isKeyPressed(Input.Keys.S)) {
+            direction.y -= 1;
+            direction.x += 1;
+            lastDirection.set(1, -1);
+            isMoving = true;
+            handleAnimation(walkingRightFrames, deltaTime);
+        }   else if(Gdx.input.isKeyPressed(Input.Keys.D) && Gdx.input.isKeyPressed(Input.Keys.W)){
+            direction.x  += 1;
+            direction.y += 1;
+            isMoving = true;
+            lastDirection.set(1, 1);
+            handleAnimation(walkingRightFrames, deltaTime);
+        }   else if (Gdx.input.isKeyPressed(Input.Keys.A) && Gdx.input.isKeyPressed(Input.Keys.W)){
+            direction.x -= 1;
+            direction.y += 1;
+            lastDirection.set(-1, 1);
+            isMoving = true;
+            handleAnimation(walkingLeftFrames, deltaTime);
+        }   else if (Gdx.input.isKeyPressed(Input.Keys.A) && Gdx.input.isKeyPressed(Input.Keys.S)){
+            direction.x -= 1;
+            direction.y -= 1;
+            lastDirection.set(-1, -1);
+            isMoving = true;
+            handleAnimation(walkingLeftFrames, deltaTime);
         }
 
         if (!isMoving) resetToIdleState();
@@ -228,8 +255,8 @@ public class Player {
     }
 
     private boolean isColliding(Vector2 newPos) {
-        float tileWidth = collisionLayer.getTileWidth();
-        float tileHeight = collisionLayer.getTileHeight();
+        float tileWidth = collisionLayer.getTileWidth() * 4; //by 4 because of scaling
+        float tileHeight = collisionLayer.getTileHeight() * 4; // multiply by 4 because of scaling
 
         int tileX = (int) (newPos.x / tileWidth);
         int tileY = (int) (newPos.y / tileHeight);
@@ -240,11 +267,10 @@ public class Player {
             TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
             if (cell != null && cell.getTile().getProperties().containsKey("blocked")) {
                 System.out.print("colliding");
-                return true; // Collision with blocked tile
+                return true;
             }
         }
-        System.out.print("asd");
-        return false; // No collision
+        return false;
 
     }
 
