@@ -1,6 +1,8 @@
 package com.EmbersTrial.player;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 
@@ -15,14 +17,14 @@ public class PlayerRenderer {
         this.originalHeight = playerTexture.getHeight();
     }
 
-    public void render(SpriteBatch batch, Vector2 position) {
+    public void render(Batch batch, Vector2 position) {
         if (playerTexture == null || playerTexture.getTextureObjectHandle() == 0) {
-            System.err.println("Invalid texture being rendered!");
+            Gdx.app.error("PlayerRenderer", "Player texture is invalid!");
             return;
         }
         batch.draw(playerTexture, position.x, position.y, originalWidth * 4, originalHeight * 4);
+        Gdx.app.log("PlayerRenderer", "Drawing player at (" + position.x + ", " + position.y + ")");
     }
-
 
     public void setTexture(Texture newTexture) {
 //        if (playerTexture != null) {

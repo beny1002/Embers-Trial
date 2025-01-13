@@ -3,6 +3,11 @@ package com.EmbersTrial.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -19,40 +24,62 @@ public class CutsceneScreen {
     private TextButton skipButton;
     private boolean buttonAdded = false; //track if the skip button has been added
     private InputAdapter cutsceneInputAdapter;
+    private Actor fadeOverlay; // fade overlay actor
+    private Texture blackTexture; // dynamic texture for black overlay
 
     public CutsceneScreen(Runnable onComplete) {
-        //set up stage and viewport
         viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport);
 
         skin = new Skin(Gdx.files.internal("metal-ui.json"));
 
+        createBlackTexture(); // create the black texture for the overlay
+        setupFadeOverlay(); // add the fade overlay
         setupCutscene(onComplete);
 
-        //set up input handling with inputmultiplexer
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(stage); //stage must handle button clicks
+        multiplexer.addProcessor(stage);
 
-        //initialize inputadapter
         cutsceneInputAdapter = new InputAdapter() {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                Gdx.app.log("CutsceneScreen", "Screen clicked: Adding skip button.");
                 if (!buttonAdded) {
-                    setupSkipButton(onComplete); //add skip button on first click
+                    setupSkipButton(onComplete);
                     buttonAdded = true;
                 }
-                return true; //consume the event
+                return true;
             }
         };
 
         multiplexer.addProcessor(cutsceneInputAdapter);
         Gdx.input.setInputProcessor(multiplexer);
+
+        fadeOverlay.addAction(Actions.fadeOut(1f)); // fade in the scene
+    }
+
+    private void createBlackTexture() {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.BLACK);
+        pixmap.fill();
+        blackTexture = new Texture(pixmap);
+        pixmap.dispose();
+    }
+
+    private void setupFadeOverlay() {
+        fadeOverlay = new Actor() {
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                batch.setColor(0, 0, 0, getColor().a);
+                batch.draw(blackTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+                batch.setColor(1, 1, 1, 1);
+            }
+        };
+        fadeOverlay.setColor(0, 0, 0, 1);
+        fadeOverlay.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        stage.addActor(fadeOverlay);
     }
 
     private void setupCutscene(Runnable onComplete) {
-        stage.clear();
-
         Table dialogueTable = new Table();
         dialogueTable.setFillParent(true);
         stage.addActor(dialogueTable);
@@ -67,58 +94,47 @@ public class CutsceneScreen {
             String line = dialogue[i];
             Label dialogueLabel = new Label(line, skin);
             dialogueLabel.setFontScale(2.0f);
-            dialogueLabel.getColor().a = 0; //start initially transparent
+            dialogueLabel.getColor().a = 0;
 
             dialogueTable.row();
             dialogueTable.add(dialogueLabel).pad(10);
             dialogueLabel.addAction(Actions.sequence(
-                Actions.delay(i * 2f), //delay before showing
-                Actions.fadeIn(1f) //fade in over 1 second
+                Actions.delay(i * 2f),
+                Actions.fadeIn(1f)
             ));
         }
 
-        //transition to gamescreen after dialogue ends
         stage.addAction(Actions.sequence(
-            Actions.delay(dialogue.length * 2f + 2f), //total duration of dialogue
+            Actions.delay(dialogue.length * 2f + 2f),
             Actions.run(() -> {
-                Gdx.app.log("CutsceneScreen", "Cutscene ended. Removing input listener.");
-                disposeInput(); //remove the input listener when cutscene ends
-                onComplete.run(); //callback to transition
+                disposeInput();
+                onComplete.run();
             })
         ));
     }
 
     private void setupSkipButton(Runnable onComplete) {
         skipButton = new TextButton("Skip", skin);
-        skipButton.setSize(200, 80); //set button size
-
-        //dynamically position button in bottom-right corner
-        skipButton.setPosition(
-            viewport.getWorldWidth() - skipButton.getWidth() - 20, //right margin
-            20 //bottom margin
-        );
+        skipButton.setSize(200, 80);
+        skipButton.setPosition(viewport.getWorldWidth() - skipButton.getWidth() - 20, 20);
 
         skipButton.addListener(new ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                Gdx.app.log("CutsceneScreen", "Skip button clicked."); //debug log
-                disposeInput(); //remove input listener on skip
-                stage.clear(); //clear all ongoing actions and actors
-                onComplete.run(); //immediately transition to the next screen
+                disposeInput();
+                stage.clear();
+                onComplete.run();
             }
         });
 
         stage.addActor(skipButton);
-        Gdx.app.log("CutsceneScreen", "Skip button added to stage.");
     }
 
     private void disposeInput() {
-        //clear the input listener
         if (Gdx.input.getInputProcessor() instanceof InputMultiplexer) {
             InputMultiplexer multiplexer = (InputMultiplexer) Gdx.input.getInputProcessor();
             multiplexer.removeProcessor(cutsceneInputAdapter);
         }
-        Gdx.app.log("CutsceneScreen", "Input listener disposed.");
     }
 
     public void render() {
@@ -128,19 +144,16 @@ public class CutsceneScreen {
 
     public void resize(int width, int height) {
         viewport.update(width, height);
-
         if (buttonAdded && skipButton != null) {
-            //reposition the skip button after resizing
-            skipButton.setPosition(
-                viewport.getWorldWidth() - skipButton.getWidth() - 20,
-                20
-            );
+            skipButton.setPosition(viewport.getWorldWidth() - skipButton.getWidth() - 20, 20);
         }
     }
 
     public void dispose() {
-        disposeInput(); //ensure the input listener is removed
+        disposeInput();
+        stage.clear();
         stage.dispose();
         skin.dispose();
+        blackTexture.dispose();
     }
 }
