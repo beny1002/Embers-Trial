@@ -58,25 +58,33 @@ public class Player {
 
         walkingUpFrames = new Texture[]{
             new Texture(Gdx.files.internal("player_leftLegWalk_back.png")),
+            new Texture(Gdx.files.internal("player_leftLegWalk_back.png")),
             standingBack,
+            new Texture(Gdx.files.internal("player_rightLegWalk_back.png")),
             new Texture(Gdx.files.internal("player_rightLegWalk_back.png")),
             standingBack,
         };
         walkingDownFrames = new Texture[]{
             new Texture(Gdx.files.internal("player_leftLegWalk_front.png")),
+            new Texture(Gdx.files.internal("player_leftLegWalk_front.png")),
             standingFront,
+            new Texture(Gdx.files.internal("player_rightLegWalk_front.png")),
             new Texture(Gdx.files.internal("player_rightLegWalk_front.png")),
             standingFront,
         };
         walkingLeftFrames = new Texture[]{
             new Texture(Gdx.files.internal("player_leftLegWalk_faceLeft.png")),
+            new Texture(Gdx.files.internal("player_leftLegWalk_faceLeft.png")),
             standingLeft,
+            new Texture(Gdx.files.internal("player_rightLegWalk_faceLeft.png")),
             new Texture(Gdx.files.internal("player_rightLegWalk_faceLeft.png")),
             standingLeft,
         };
         walkingRightFrames = new Texture[]{
             new Texture(Gdx.files.internal("player_leftLegWalk_faceRight.png")),
+            new Texture(Gdx.files.internal("player_leftLegWalk_faceRight.png")),
             standingRight,
+            new Texture(Gdx.files.internal("player_rightLegWalk_faceRight.png")),
             new Texture(Gdx.files.internal("player_rightLegWalk_faceRight.png")),
             standingRight,
         };
@@ -210,6 +218,7 @@ public class Player {
     }
 
     public Vector2 getPosition() {
+
         return position;
     }
 
