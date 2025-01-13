@@ -2,8 +2,10 @@ package com.EmbersTrial.screens;
 
 import com.EmbersTrial.Main;
 import com.EmbersTrial.player.Player;
+import com.EmbersTrial.ui.GameUI;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -44,21 +46,23 @@ public class GameScreen {
     private TiledMap tiledmap;
     private OrthogonalTiledMapRenderer orthoRenderer;
 
+    // GameUI instance
+    private GameUI gameUI;
+
+    // InputMultiplexer to handle multiple input processors
+    private InputMultiplexer inputMultiplexer;
+
     public GameScreen(Main mainApp) {
         this.mainApp = mainApp;
 
         // camera and viewport setup
         camera = new OrthographicCamera();
-        viewport = new FitViewport(1920, 1080, camera); // initial viewport
-        //use this camera to see whole screen
-        //camera.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
-        //camera.update();
+        viewport = new FitViewport(1920, 1080, camera);
 
         // spritebatch setup
         batch = new SpriteBatch();
 
         // initialize tile map
-        //tileMap = new TileMap("untitled.png");
         tiledmap = new TmxMapLoader().load("untitled.tmx");
         orthoRenderer = new OrthogonalTiledMapRenderer(tiledmap, 4f);
 
@@ -72,23 +76,34 @@ public class GameScreen {
         float mapCenterY = mapHeight / 2;
 
         // initialize player
-        player = new Player(new Texture(Gdx.files.internal("player_stand_front.png")),(TiledMapTileLayer) tiledmap.getLayers().get(0));
-        player.getPosition().set(mapCenterX - (50), mapCenterY - (400)); //X = mapCenterX - 50 for very center of x
+        player = new Player(new Texture(Gdx.files.internal("player_stand_front.png")), (TiledMapTileLayer) tiledmap.getLayers().get(0));
+        player.getPosition().set(mapCenterX - 50, mapCenterY - 400);
 
         // initialize pause menu
         initPauseMenu();
 
-        // set input processor for scroll zoom
-        Gdx.input.setInputProcessor(new InputAdapter() {
+        // initialize UI
+        gameUI = new GameUI();
+
+        // Initialize InputMultiplexer
+        inputMultiplexer = new InputMultiplexer();
+
+        // Add zoom input handling
+        inputMultiplexer.addProcessor(new InputAdapter() {
             @Override
             public boolean scrolled(float amountX, float amountY) {
-                // zoom in or out based on scroll direction
                 camera.zoom += amountY > 0 ? zoomStep : -zoomStep;
-                camera.zoom = Math.max(minZoom, Math.min(maxZoom, camera.zoom)); // clamp zoom
+                camera.zoom = Math.max(minZoom, Math.min(maxZoom, camera.zoom));
                 camera.update();
-                return true; // event handled
+                return true;
             }
         });
+
+        // Add the pause stage to the InputMultiplexer
+        inputMultiplexer.addProcessor(pauseStage);
+
+        // Set the input processor
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     private void initPauseMenu() {
@@ -103,18 +118,17 @@ public class GameScreen {
         TextButton resumeButton = new TextButton("Resume", skin);
         resumeButton.addListener(event -> {
             if (resumeButton.isPressed()) {
-                togglePause(false); // unpause the game
+                togglePause(false);
             }
             return true;
         });
 
         // exit to main menu button
         TextButton exitButton = new TextButton("Exit to Main Menu", skin);
-
         exitButton.addListener(event -> {
             if (exitButton.isPressed()) {
                 mainApp.setMainMenuScreen();
-                dispose(); // dispose resources after transitioning
+                dispose();
             }
             return true;
         });
@@ -122,7 +136,6 @@ public class GameScreen {
         pauseTable.add(resumeButton).width(200).height(50).padBottom(10);
         pauseTable.row();
         pauseTable.add(exitButton).width(200).height(50);
-
     }
 
     public void render() {
@@ -137,7 +150,7 @@ public class GameScreen {
         // handle pause toggle
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE) && pauseCooldownTimer <= 0) {
             togglePause(!isPaused);
-            pauseCooldownTimer = pauseCooldown; // reset cooldown timer
+            pauseCooldownTimer = pauseCooldown;
         }
 
         // clear the screen
@@ -158,9 +171,9 @@ public class GameScreen {
 
         batch.begin();
 
-
         // render the player
         player.render(batch);
+
         batch.end();
 
         // render pause overlay and menu if paused
@@ -169,28 +182,31 @@ public class GameScreen {
             pauseStage.act();
             pauseStage.draw();
         }
+
+        // render the UI overlay
+        gameUI.render(Gdx.graphics.getDeltaTime());
     }
 
     private void renderPauseOverlay() {
         // render a transparent black rectangle over the entire screen
         batch.begin();
-        batch.setColor(0, 0, 0, 0.5f); // semi-transparent black
-        //batch.draw(tiledmap.getBlankTile(), 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        batch.setColor(0, 0, 0, 0.5f);
         batch.end();
-        batch.setColor(Color.WHITE); // reset color to default
+        batch.setColor(Color.WHITE);
     }
 
     private void togglePause(boolean pause) {
         isPaused = pause;
         if (isPaused) {
-            Gdx.input.setInputProcessor(pauseStage); // set input to pause menu
+            inputMultiplexer.addProcessor(pauseStage); // add pause stage input
         } else {
-            Gdx.input.setInputProcessor(null); // allow player control
+            inputMultiplexer.removeProcessor(pauseStage); // remove pause stage input
         }
     }
 
     public void resize(int width, int height) {
         viewport.update(width, height);
+        gameUI.resize(width, height);
     }
 
     public void dispose() {
@@ -199,5 +215,6 @@ public class GameScreen {
         if (player != null) player.dispose();
         if (pauseStage != null) pauseStage.dispose();
         if (skin != null) skin.dispose();
+        gameUI.dispose();
     }
 }
