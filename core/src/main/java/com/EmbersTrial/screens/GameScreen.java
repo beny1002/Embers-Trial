@@ -41,7 +41,6 @@ public class GameScreen {
     private Main mainApp;
 
     // tilemap
-    private TileMap tileMap;
     private TiledMap tiledmap;
     private OrthogonalTiledMapRenderer orthoRenderer;
 
@@ -155,8 +154,6 @@ public class GameScreen {
         }
 
         batch.begin();
-        // render the tile map
-        //tileMap.render(batch, camera);
 
 
         // render the player
@@ -175,7 +172,7 @@ public class GameScreen {
         // render a transparent black rectangle over the entire screen
         batch.begin();
         batch.setColor(0, 0, 0, 0.5f); // semi-transparent black
-        batch.draw(tileMap.getBlankTile(), 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        //batch.draw(tiledmap.getBlankTile(), 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         batch.end();
         batch.setColor(Color.WHITE); // reset color to default
     }
@@ -195,7 +192,7 @@ public class GameScreen {
 
     public void dispose() {
         if (batch != null) batch.dispose();
-        if (tileMap != null) tileMap.dispose();
+        if (tiledmap != null) tiledmap.dispose();
         if (player != null) player.dispose();
         if (pauseStage != null) pauseStage.dispose();
         if (skin != null) skin.dispose();

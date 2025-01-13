@@ -255,14 +255,12 @@ public class Player {
     }
 
     private boolean isColliding(Vector2 newPos) {
-        float tileWidth = collisionLayer.getTileWidth() * 4; //by 4 because of scaling
-        float tileHeight = collisionLayer.getTileHeight() * 4; // multiply by 4 because of scaling
+        float tileWidth = collisionLayer.getTileWidth() * 4f; //by 4 because of scaling
+        float tileHeight = collisionLayer.getTileHeight() * 4f; // multiply by 4 because of scaling
 
         int tileX = (int) (newPos.x / tileWidth);
         int tileY = (int) (newPos.y / tileHeight);
 
-        // https://stackoverflow.com/questions/20063281/libgdx-collision-detection-with-tiledmap
-        // https://hg.sr.ht/~dermetfan/tiledmapgame/rev/90747217a92e3b14ca00ee6927221d0138ee5430#TiledMapGame/src/net/dermetfan/tiledMapGame/TiledMapGame.java
         if (tileX >= 0 && tileX < collisionLayer.getWidth() && tileY >= 0 && tileY < collisionLayer.getHeight()) {
             TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
             if (cell != null && cell.getTile().getProperties().containsKey("blocked")) {
