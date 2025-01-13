@@ -66,8 +66,11 @@ public class GameScreen {
         tiledmap = new TmxMapLoader().load("untitled.tmx");
         orthoRenderer = new OrthogonalTiledMapRenderer(tiledmap, 4f);
 
-        float mapWidth = tiledmap.getProperties().get("width", Integer.class) * 128; // 32 * x (the unit scale from orthoRenderer)
-        float mapHeight = tiledmap.getProperties().get("height", Integer.class) * 128; // 32 * y (the unit scale from orthoRenderer)
+        float mapWidth = tiledmap.getProperties().get("width", Integer.class) * 160; //40 * x (the unit scale from orthoRenderer)
+        System.out.print(mapWidth);
+
+        float mapHeight = tiledmap.getProperties().get("height", Integer.class) * 120; //30 * y (the unit scale from orthoRenderer)
+        System.out.print(mapHeight);
         camera.position.set(mapWidth / 2, mapHeight / 2, 0);
         float mapCenterX = mapWidth / 2;
         float mapCenterY = mapHeight / 2;
