@@ -57,6 +57,7 @@ public class Player {
         standingRight = new Texture(Gdx.files.internal("player_stand_right.png"));
 
         walkingUpFrames = new Texture[]{
+            //added two walking to make the animation slower
             new Texture(Gdx.files.internal("player_leftLegWalk_back.png")),
             new Texture(Gdx.files.internal("player_leftLegWalk_back.png")),
             standingBack,

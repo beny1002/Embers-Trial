@@ -45,8 +45,9 @@ public class GameScreen {
         // camera and viewport setup
         camera = new OrthographicCamera();
         viewport = new FitViewport(1920, 1080, camera); // initial viewport
-        camera.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
-        camera.update();
+        //use this camera to see whole screen
+        //camera.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
+        //camera.update();
 
         // spritebatch setup
         batch = new SpriteBatch();
@@ -124,6 +125,8 @@ public class GameScreen {
         // clear the screen
         ScreenUtils.clear(0, 0, 0, 1);
 
+        camera.position.set(player.getPosition().x, player.getPosition().y, 0);
+        camera.update();
         batch.setProjectionMatrix(camera.combined);
 
         if (!isPaused) {
