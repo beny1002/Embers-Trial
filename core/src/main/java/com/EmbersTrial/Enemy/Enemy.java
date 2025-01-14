@@ -1,77 +1,80 @@
 package com.EmbersTrial.Enemy;
 
-// Basic enemy stats now scale with waves
-public class Enemy {
-    // Track the number of waves to dynamically increase stats
-    private double numWaves = 1;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Vector2;
 
-    // Base stats for the enemy
+public abstract class Enemy {
     private String name;
     private double hp;
     private double defense;
     private double damage;
     private double attackSpeed;
+    private double numWaves = 1; // Tracks waves for scaling stats
 
-    // Constructor for setting stats
-    public Enemy(String name, double baseHp, double baseDefense, double baseDamage, double baseAttackSpeed) {
+    protected Texture currentTexture;
+    protected Vector2 position;
+    protected Vector2 direction;
+    protected float speed;
+    protected TiledMapTileLayer collisionLayer;
+
+    public Enemy(String name, double baseHp, double baseDefense, double baseDamage, double baseAttackSpeed, Texture texture, Vector2 position, TiledMapTileLayer collisionLayer, float speed) {
         this.name = name;
-        this.hp = baseHp + (numWaves * 10); // Increase HP with waves
-        this.defense = baseDefense + (numWaves * 2); // Increase Defense with waves
-        this.damage = baseDamage + (numWaves * 3); // Increase Damage with waves
-        this.attackSpeed = baseAttackSpeed + (numWaves * 0.1); // Slightly increase Attack Speed with waves
+        this.hp = baseHp + (numWaves * 10);
+        this.defense = baseDefense + (numWaves * 2);
+        this.damage = baseDamage + (numWaves * 3);
+        this.attackSpeed = baseAttackSpeed + (numWaves * 0.1);
+
+        this.currentTexture = texture;
+        this.position = position;
+        this.direction = new Vector2(0, 0);
+        this.collisionLayer = collisionLayer;
+        this.speed = speed;
     }
 
-    // Increment wave count and update scaling factor
-    public double incrementWaves() {
-        numWaves++;
-        return numWaves;
-    }
+    public void update(float deltaTime, Vector2 targetPosition) {
+        direction.set(targetPosition).sub(position).nor();
+        float currentSpeed = speed * deltaTime;
+        Vector2 newPos = new Vector2(position).add(direction.scl(currentSpeed));
 
-    // Apply damage to this enemy's HP
-    public void takeDamage(double attackDamage, double defense) {
-        double effectiveDamage = Math.max(attackDamage - defense, 0); // No negative damage
-        hp -= effectiveDamage;
-        if (hp < 0) {
-            hp = 0; // Ensure HP doesn't go below 0
+        if (!isColliding(newPos)) {
+            position.set(newPos);
         }
+    }
+
+    private boolean isColliding(Vector2 newPos) {
+        float tileWidth = collisionLayer.getTileWidth() * 4f;
+        float tileHeight = collisionLayer.getTileHeight() * 4f;
+
+        int tileX = (int) (newPos.x / tileWidth);
+        int tileY = (int) (newPos.y / tileHeight);
+
+        if (tileX >= 0 && tileX < collisionLayer.getWidth() && tileY >= 0 && tileY < collisionLayer.getHeight()) {
+            TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
+            return cell != null && cell.getTile().getProperties().containsKey("blocked");
+        }
+
+        return false;
+    }
+
+    public void render(SpriteBatch batch) {
+        batch.draw(currentTexture, position.x, position.y);
+    }
+
+    public void takeDamage(double attackDamage) {
+        double effectiveDamage = Math.max(attackDamage - defense, 0);
+        hp -= effectiveDamage;
+        if (hp < 0) hp = 0;
+
         System.out.println(name + " took " + effectiveDamage + " damage. Remaining HP: " + hp);
     }
 
-
-    // Inner classes for specific enemy types with predefined stats
-    public static class Goblin extends Enemy {
-        public Goblin() {
-            super("Goblin", 50, 5, 10, 1.2); // Goblin stats
+    public void dispose() {
+        if (currentTexture != null) {
+            currentTexture.dispose();
         }
     }
 
-    public static class Dragon extends Enemy {
-        public Dragon() {
-            super("Dragon", 500, 20, 50, 0.5); // Dragon stats
-        }
-    }
-
-    public static class Knight extends Enemy {
-        public Knight() {
-            super("Knight", 150, 15, 25, 0.9); // Knight stats
-        }
-    }
-
-    public static class Bandit extends Enemy {
-        public Bandit() {
-            super("Bandit", 70, 8, 15, 1.1); // Bandit stats
-        }
-    }
-
-    public static class Archers extends Enemy {
-        public Archers() {
-            super("Archers", 60, 4, 12, 1.5); // Archers stats
-        }
-    }
-
-    public static class Slimes extends Enemy {
-        public Slimes() {
-            super("Slimes", 30, 2, 5, 0.7); // Slimes stats
-        }
-    }
+    public abstract void handleAnimation(float deltaTime, Vector2 targetPosition);
 }
