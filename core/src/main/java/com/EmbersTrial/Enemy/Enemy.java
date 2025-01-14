@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Array;
 // Basic enemy stats now scale with waves
 public class Enemy {
     // Track the number of waves to dynamically increase stats
-    private double numWaves = 1;
+    private   double numWaves = 1;
 
     // Base stats for the enemy
     private String name;
