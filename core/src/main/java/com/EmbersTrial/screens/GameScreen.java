@@ -8,6 +8,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -26,6 +27,7 @@ public class GameScreen {
     private OrthographicCamera camera;
     private FitViewport viewport;
 
+    private com.badlogic.gdx.graphics.Cursor customCursor;
     // zoom-related variables
     private float maxZoom = 3f; // maximum zoom out
     private float minZoom = 0.5f; // maximum zoom in
@@ -83,7 +85,7 @@ public class GameScreen {
         initPauseMenu();
 
         // initialize UI
-        gameUI = new GameUI();
+        gameUI = new GameUI(player);
 
         // Initialize InputMultiplexer
         inputMultiplexer = new InputMultiplexer();
@@ -104,7 +106,25 @@ public class GameScreen {
 
         // Set the input processor
         Gdx.input.setInputProcessor(inputMultiplexer);
+
+        initializeCustomCursor();
+
     }
+
+    private void initializeCustomCursor() {
+        // Load the custom cursor image as a Pixmap
+        Pixmap cursorPixmap = new Pixmap(Gdx.files.internal("target.png"));
+
+        // Create the custom cursor
+        customCursor = Gdx.graphics.newCursor(cursorPixmap, cursorPixmap.getWidth() / 2, cursorPixmap.getHeight() / 2);
+
+        // Set the custom cursor
+        Gdx.graphics.setCursor(customCursor);
+
+        // Dispose the Pixmap after setting the cursor (it’s no longer needed)
+        cursorPixmap.dispose();
+    }
+
 
     private void initPauseMenu() {
         pauseStage = new Stage(viewport);
@@ -215,6 +235,10 @@ public class GameScreen {
         if (player != null) player.dispose();
         if (pauseStage != null) pauseStage.dispose();
         if (skin != null) skin.dispose();
+        if (customCursor != null) {
+            customCursor.dispose();
+        }
+
         gameUI.dispose();
     }
 }
