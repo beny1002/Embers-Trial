@@ -6,11 +6,13 @@ public class Stats {
     private int exp;
     private int level;
 
+
     public Stats(int health, int exp) {
         this.health = health;
         this.maxHealth = health;
         this.exp = exp;
         this.level = 1;
+
     }
 
     public void takeDamage(int damage) {

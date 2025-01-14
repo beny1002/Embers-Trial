@@ -1,15 +1,45 @@
 package com.EmbersTrial.Items;
+import java.util.Random;
 //the base value of each Item is the beginning now just change each item value to be a variable and create new items that just implement the methods
 // Abstract class Item
 public class ItemClass {
-    abstract class Item implements Weapons {
-        protected String name;
-        protected double baseDamage;
-        protected double baseAttackRate;
-        protected int upgradeCount;
+    public double hpUP = 100;// this is a placeholder hp thing
+    boolean isPlaying = true;
+    class Drops {//calculates the droprate have to change later to make it return something
+        public void Drop(double Droprate, double hpUp) {//The Drop rate will increase perwave and then when they get that item the droprate will reset
+            Random random = new Random();
+            int lowerBound = 1;
+            int upperBound = 100;
 
-        // Constructor
-        public Item(String name, double baseDamage, double baseAttackRate, int upgradeCount) {
+
+
+            while (upperBound > 1) {
+                int randomNumber = random.nextInt(upperBound - lowerBound + 1) + lowerBound; // Generate a random number within range
+
+                if (randomNumber != 100) {
+                    upperBound = Math.max(upperBound - 1, 1);
+                }
+
+            }
+
+        }
+    }
+
+    class potion {
+        public potion(double hpUP) {
+            double hpUp = 100;//place holder for max hp
+            double heal = hpUp * 0.2;
+            hpUp = hpUp + heal; //this is just a place holder for heals calc
+        }
+    }
+
+    public class Item implements Weapons {
+        public String name;
+        public double baseDamage;
+        public double baseAttackRate;
+        public int upgradeCount;
+
+       public Item(String name, double baseDamage, double baseAttackRate, int upgradeCount) {
             this.name = name;
             this.baseDamage = baseDamage;
             this.baseAttackRate = baseAttackRate;
@@ -22,6 +52,12 @@ public class ItemClass {
 
         public void setUpgradeCount(int upgradeCount) {
             this.upgradeCount = upgradeCount;
+        }
+        public double damage(){
+           return baseDamage;
+        }
+        public double attackRate(){
+           return baseAttackRate;
         }
     }
 
@@ -95,6 +131,24 @@ public class ItemClass {
         }
     }
 
+    class pewpew extends Bow { // new bow weapon
+        public pewpew(int upgradeCount) {
+            super(upgradeCount);
+            this.name = "pewpew";
+            this.baseDamage = 60;
+            this.baseAttackRate = 2.5;
+        }
+    }
+
+    class Bigpewpew extends Bow { // new bow weapon will change stats for the weapon later
+        public Bigpewpew(int upgradeCount) {
+            super(upgradeCount);
+            this.name = "Bigpewpew";
+            this.baseDamage = 60;
+            this.baseAttackRate = 2.5;
+        }
+    }
+
     // Crossbow Class
     class Crossbow extends Item {
         public Crossbow(int upgradeCount) {
@@ -162,6 +216,7 @@ public class ItemClass {
             return baseAttackRate + (upgradeCount * 1.1);
         }
     }
+
 }
 
 
