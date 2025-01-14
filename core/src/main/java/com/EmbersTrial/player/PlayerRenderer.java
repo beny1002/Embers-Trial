@@ -10,6 +10,7 @@ public class PlayerRenderer {
     private Texture playerTexture; //Single texture for the player
     private int originalWidth;
     private int originalHeight;
+    private static final float SCALE = 1f;
 
     public PlayerRenderer(Texture playerTexture) {
         this.playerTexture = playerTexture;
@@ -22,8 +23,15 @@ public class PlayerRenderer {
             Gdx.app.error("PlayerRenderer", "Player texture is invalid!");
             return;
         }
-        batch.draw(playerTexture, position.x, position.y, originalWidth * 4, originalHeight * 4);
-        Gdx.app.log("PlayerRenderer", "Drawing player at (" + position.x + ", " + position.y + ")");
+
+        // Calculate scaled dimensions
+        float scaledWidth = originalWidth * (SCALE);
+        float scaledHeight = originalHeight * SCALE;
+
+        // Draw the sprite using the scaled dimensions
+        batch.draw(playerTexture, position.x, position.y, scaledWidth, scaledHeight);
+        Gdx.app.log("PlayerRenderer", "Drawing player at (" + position.x + ", " + position.y +
+            ") with dimensions: " + scaledWidth + "x" + scaledHeight);
     }
 
     public void setTexture(Texture newTexture) {
