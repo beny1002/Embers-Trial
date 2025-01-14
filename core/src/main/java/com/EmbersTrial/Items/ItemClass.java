@@ -4,11 +4,23 @@ import java.util.Random;
 // Abstract class Item
 public class ItemClass {
     public double hpUP = 100;// this is a placeholder hp thing
+    boolean isPlaying = true;
+    class Drops {//calculates the droprate have to change later to make it return something
+        public void Drop(double Droprate, double hpUp) {//The Drop rate will increase perwave and then when they get that item the droprate will reset
+            Random random = new Random();
+            int lowerBound = 1;
+            int upperBound = 100;
 
-    class Drops {
-        public double Drop(double Droprate, double hpUp) {//The Drop rate will increase perwave and then when they get that item the droprate will reset
-            Random random=new Random();
-            double currentHealth = hpUp;
+
+
+            while (upperBound > 1) {
+                int randomNumber = random.nextInt(upperBound - lowerBound + 1) + lowerBound; // Generate a random number within range
+
+                if (randomNumber != 100) {
+                    upperBound = Math.max(upperBound - 1, 1);
+                }
+
+            }
 
         }
     }
@@ -21,14 +33,13 @@ public class ItemClass {
         }
     }
 
-    abstract class Item implements Weapons {
-        protected String name;
-        protected double baseDamage;
-        protected double baseAttackRate;
-        protected int upgradeCount;
+    public class Item implements Weapons {
+        public String name;
+        public double baseDamage;
+        public double baseAttackRate;
+        public int upgradeCount;
 
-        // Constructor
-        public Item(String name, double baseDamage, double baseAttackRate, int upgradeCount) {
+       public Item(String name, double baseDamage, double baseAttackRate, int upgradeCount) {
             this.name = name;
             this.baseDamage = baseDamage;
             this.baseAttackRate = baseAttackRate;
@@ -41,6 +52,12 @@ public class ItemClass {
 
         public void setUpgradeCount(int upgradeCount) {
             this.upgradeCount = upgradeCount;
+        }
+        public double damage(){
+           return baseDamage;
+        }
+        public double attackRate(){
+           return baseAttackRate;
         }
     }
 
