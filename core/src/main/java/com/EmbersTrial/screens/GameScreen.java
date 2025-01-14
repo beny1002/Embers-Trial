@@ -6,6 +6,7 @@ import com.EmbersTrial.ui.GameUI;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -22,10 +23,25 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import com.EmbersTrial.Enemy.Goblin;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.Texture;
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameScreen {
     private SpriteBatch batch;
     private OrthographicCamera camera;
     private FitViewport viewport;
+
+    private Music combatMusic;
+
+
+
+
+    //TESTING GOBLIN
+    private List<Goblin> goblins;
+
 
     private com.badlogic.gdx.graphics.Cursor customCursor;
     // zoom-related variables
@@ -78,8 +94,13 @@ public class GameScreen {
         float mapCenterY = mapHeight / 2;
 
         // initialize player
-        player = new Player(new Texture(Gdx.files.internal("player_stand_front.png")), (TiledMapTileLayer) tiledmap.getLayers().get(0));
+        player = new Player(new Texture(Gdx.files.internal("Entities/player/player_down_up_idle.png")), (TiledMapTileLayer) tiledmap.getLayers().get(0));
         player.getPosition().set(mapCenterX - 50, mapCenterY - 400);
+
+
+        //TEST INITIALIZE GOBLIN
+        goblins = new ArrayList<>();
+        spawnGoblins(5); // Spawn 5 goblins as an example
 
         // initialize pause menu
         initPauseMenu();
@@ -108,22 +129,53 @@ public class GameScreen {
         Gdx.input.setInputProcessor(inputMultiplexer);
 
         initializeCustomCursor();
+        // Load and configure background music
+        combatMusic = Gdx.audio.newMusic(Gdx.files.internal("combat theme.wav"));
+        combatMusic.setLooping(true);
+        combatMusic.setVolume(mainApp.getPreferences().getFloat("volume", 0.2f));
+        combatMusic.play();
 
+    }
+
+    //TEST METHOD GOBLIN
+    private void spawnGoblins(int count) {
+        for (int i = 0; i < count; i++) {
+            // Spawn goblins at random positions on the map
+            float spawnX = (float) Math.random() * tiledmap.getProperties().get("width", Integer.class) * 160;
+            float spawnY = (float) Math.random() * tiledmap.getProperties().get("height", Integer.class) * 120;
+            goblins.add(new Goblin(new Texture(Gdx.files.internal("Entities/player/player_down_up_idle.png")), new Vector2(spawnX, spawnY)));
+        }
     }
 
     private void initializeCustomCursor() {
         // Load the custom cursor image as a Pixmap
-        Pixmap cursorPixmap = new Pixmap(Gdx.files.internal("target.png"));
+        Pixmap originalPixmap = new Pixmap(Gdx.files.internal("crosshair.png"));
 
-        // Create the custom cursor
-        customCursor = Gdx.graphics.newCursor(cursorPixmap, cursorPixmap.getWidth() / 2, cursorPixmap.getHeight() / 2);
+        // Scale factor (e.g., 0.5 for half size)
+        float scaleFactor = 0.5f; // Change this to adjust the size
+
+        // Create a scaled Pixmap
+        int newWidth = (int) (originalPixmap.getWidth() * scaleFactor);
+        int newHeight = (int) (originalPixmap.getHeight() * scaleFactor);
+        Pixmap scaledPixmap = new Pixmap(newWidth, newHeight, originalPixmap.getFormat());
+
+        // Draw the original Pixmap into the scaled Pixmap
+        scaledPixmap.drawPixmap(originalPixmap,
+            0, 0, originalPixmap.getWidth(), originalPixmap.getHeight(), // Source dimensions
+            0, 0, newWidth, newHeight // Target dimensions
+        );
+
+        // Create the custom cursor with the scaled Pixmap
+        customCursor = Gdx.graphics.newCursor(scaledPixmap, newWidth / 2, newHeight / 2);
 
         // Set the custom cursor
         Gdx.graphics.setCursor(customCursor);
 
-        // Dispose the Pixmap after setting the cursor (it’s no longer needed)
-        cursorPixmap.dispose();
+        // Dispose the original and scaled Pixmaps after use
+        originalPixmap.dispose();
+        scaledPixmap.dispose();
     }
+
 
 
     private void initPauseMenu() {
@@ -187,12 +239,22 @@ public class GameScreen {
         if (!isPaused) {
             // update game logic
             player.update(Gdx.graphics.getDeltaTime());
+
+            //TEST GOBLIN
+            for (Goblin goblin : goblins) {
+                goblin.update(Gdx.graphics.getDeltaTime(), player.getPosition());
+            }
         }
 
         batch.begin();
 
         // render the player
         player.render(batch);
+
+        // Render goblins
+        for (Goblin goblin : goblins) {
+            goblin.render(batch);
+        }
 
         batch.end();
 
@@ -240,5 +302,10 @@ public class GameScreen {
         }
 
         gameUI.dispose();
+
+        // Dispose goblins
+        for (Goblin goblin : goblins) {
+            goblin.dispose();
+        }
     }
 }

@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -25,8 +25,14 @@ public class Player {
     private float animationTimer = 0f;
     private float animationSpeed = 0.1f;
     private int currentFrameIndex = 0;
+
+    // Player animations for idle, walking, and slashing
     private Texture[] walkingUpFrames, walkingDownFrames, walkingLeftFrames, walkingRightFrames;
+    private Texture[] slashingUpFrames, slashingDownFrames, slashingLeftFrames, slashingRightFrames;
     private Texture standingBack, standingFront, standingLeft, standingRight;
+    private boolean isAttacking = false; // Flag to indicate if the player is attacking
+    private boolean isMoving = false; // Flag to check if player is moving
+
     private Vector2 lastDirection = new Vector2(0, -1); // Default direction for idle
 
     private boolean isBoosting = false;
@@ -48,12 +54,11 @@ public class Player {
 
     private TiledMapTileLayer collisionLayer;
 
-    //add particles
+    // Add particles
     private ArrayList<Particle> particles;
     private Texture particleTexture;
     private List<Particle> sprintParticles = new ArrayList<>();
     private List<Particle> boostParticles = new ArrayList<>();
-
 
     // Player stats for health and XP
     private Stats stats;
@@ -71,14 +76,20 @@ public class Player {
         font.setColor(Color.RED); // Set the font color to red
         layout = new GlyphLayout(); // Used to calculate text width/height
 
-        stats = new Stats(100, 0); // Initialize stats with 100 health and 0 XP
-        setAnimations();
+        stats = new Stats(100, 50); // Initialize stats with 100 health and 50 XP
+        setAnimations(); // Set all the animations for idle, walking, and slashing
 
         // Initialize particles
         particleTexture = createParticleTexture(); // Small dot texture
         particles = new ArrayList<>();
     }
 
+    // Add the getPosition method here:
+    public Vector2 getPosition() {
+        return position; // Return the player's current position
+    }
+
+    // Add the getPlayerWidth method here:
     public int getPlayerWidth() {
         return standingBack != null ? standingBack.getWidth() : 0;
     }
@@ -87,41 +98,53 @@ public class Player {
         return standingBack != null ? standingBack.getHeight() : 0;
     }
 
-    public Vector2 getPosition() {
-        return position; // Return the player's current position
-    }
-
-    public Stats getStats() {
-        return stats; // Expose player stats for UI integration
-    }
-
     public void setAnimations() {
-        standingBack = new Texture(Gdx.files.internal("player_stand_back.png"));
-        standingFront = new Texture(Gdx.files.internal("player_stand_front.png"));
-        standingLeft = new Texture(Gdx.files.internal("player_stand_left.png"));
-        standingRight = new Texture(Gdx.files.internal("player_stand_right.png"));
+        standingBack = new Texture(Gdx.files.internal("Entities/player/player_up_up_idle.png"));
+        standingFront = new Texture(Gdx.files.internal("Entities/player/player_down_up_idle.png"));
+        standingLeft = new Texture(Gdx.files.internal("Entities/player/player_left_up_idle.png"));
+        standingRight = new Texture(Gdx.files.internal("Entities/player/player_right_up_idle.png"));
 
-        walkingUpFrames = new Texture[]{
-            new Texture(Gdx.files.internal("player_leftLegWalk_back.png")),
-            new Texture(Gdx.files.internal("player_rightLegWalk_back.png")),
+        // Walking frames with sword raised
+        walkingUpFrames = new Texture[] {
+            new Texture(Gdx.files.internal("Entities/player/player_up_up_walk1.png")),
+            new Texture(Gdx.files.internal("Entities/player/player_up_up_walk2.png")),
             standingBack
         };
-
-        walkingDownFrames = new Texture[]{
-            new Texture(Gdx.files.internal("player_leftLegWalk_front.png")),
-            new Texture(Gdx.files.internal("player_rightLegWalk_front.png")),
+        walkingDownFrames = new Texture[] {
+            new Texture(Gdx.files.internal("Entities/player/player_down_up_walk1.png")),
+            new Texture(Gdx.files.internal("Entities/player/player_down_up_walk2.png")),
             standingFront
         };
-
-        walkingLeftFrames = new Texture[]{
-            new Texture(Gdx.files.internal("player_leftLegWalk_faceLeft.png")),
-            new Texture(Gdx.files.internal("player_rightLegWalk_faceLeft.png")),
+        walkingLeftFrames = new Texture[] {
+            new Texture(Gdx.files.internal("Entities/player/player_left_up_walk1.png")),
+            new Texture(Gdx.files.internal("Entities/player/player_left_up_walk2.png")),
             standingLeft
         };
+        walkingRightFrames = new Texture[] {
+            new Texture(Gdx.files.internal("Entities/player/player_right_up_walk1.png")),
+            new Texture(Gdx.files.internal("Entities/player/player_right_up_walk2.png")),
+            standingRight
+        };
 
-        walkingRightFrames = new Texture[]{
-            new Texture(Gdx.files.internal("player_leftLegWalk_faceRight.png")),
-            new Texture(Gdx.files.internal("player_rightLegWalk_faceRight.png")),
+        // Slashing frames (downward attack with the sword)
+        slashingUpFrames = new Texture[] {
+            new Texture(Gdx.files.internal("Entities/player/player_up_down_walk1.png")),
+            new Texture(Gdx.files.internal("Entities/player/player_up_down_walk2.png")),
+            standingBack
+        };
+        slashingDownFrames = new Texture[] {
+            new Texture(Gdx.files.internal("Entities/player/player_down_down_walk1.png")),
+            new Texture(Gdx.files.internal("Entities/player/player_down_down_walk2.png")),
+            standingFront
+        };
+        slashingLeftFrames = new Texture[] {
+            new Texture(Gdx.files.internal("Entities/player/player_left_down_walk1.png")),
+            new Texture(Gdx.files.internal("Entities/player/player_left_down_walk2.png")),
+            standingLeft
+        };
+        slashingRightFrames = new Texture[] {
+            new Texture(Gdx.files.internal("Entities/player/player_right_down_walk1.png")),
+            new Texture(Gdx.files.internal("Entities/player/player_right_down_walk2.png")),
             standingRight
         };
     }
@@ -130,11 +153,11 @@ public class Player {
         direction.set(0, 0);
         handleSprintLogic(deltaTime);
         handleBoostLogic(deltaTime);
-        handleAttack(deltaTime);
+        handleAttack(deltaTime); // Handle attack logic
 
-        boolean isMoving = handleMovement(deltaTime);
+        isMoving = handleMovement(deltaTime);
 
-        if (!isMoving) {
+        if (!isMoving && !isAttacking) {
             resetToIdleState();
         }
 
@@ -151,12 +174,41 @@ public class Player {
         }
     }
 
+    private void handleAttack(float deltaTime) {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) { // Trigger attack on left mouse click
+            isAttacking = true;
+            animationTimer = 0f; // Reset animation timer for attack
+        }
+
+        if (isAttacking) {
+            // Update attack animation
+            Texture[] activeFrames = null;
+            if (lastDirection.y > 0) {
+                activeFrames = slashingUpFrames;
+            } else if (lastDirection.y < 0) {
+                activeFrames = slashingDownFrames;
+            } else if (lastDirection.x < 0) {
+                activeFrames = slashingLeftFrames;
+            } else if (lastDirection.x > 0) {
+                activeFrames = slashingRightFrames;
+            }
+
+            updateAnimation(activeFrames, deltaTime);
+
+            // End attack after one cycle
+            if (currentFrameIndex == activeFrames.length - 1) {
+                isAttacking = false;
+            }
+        }
+    }
+
     private void handleSprintLogic(float deltaTime) {
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && stats.getStamina() != 0) {
             isSprinting = true;
 
-            stats.reduceStamina(45 * deltaTime);
-            // Customizable offsets for three particles
+            stats.reduceStamina(45 * deltaTime); // Decrease stamina when sprinting
+
+            // Sprint particle generation
             Vector2 offset1 = new Vector2(50, 50); // First particle (center)
             Vector2 offset2 = new Vector2(40, 50); // Second particle (left)
             Vector2 offset3 = new Vector2(60, 50); // Third particle (right)
@@ -194,17 +246,15 @@ public class Player {
             sprintParticles.add(new Particle(spawnPosition3, velocity, 0.5f, Color.GRAY, particleTexture));
         } else {
             isSprinting = false;
-
-            stats.rechargeStamina(20 * deltaTime);
-
+            stats.rechargeStamina(20 * deltaTime); // Recharge stamina when not sprinting
             sprintParticles.clear();
         }
+
         if (stats.getStamina() <= 0) {
-            stats.reduceStamina(0); // Clamp stamina to 0
-            isSprinting = false;   // Stop sprinting
+            stats.reduceStamina(0); // Prevent stamina from going below 0
+            isSprinting = false;
             sprintParticles.clear();
         }
-
     }
 
     private void handleBoostLogic(float deltaTime) {
@@ -223,7 +273,7 @@ public class Player {
             if (stats.getStamina() <= 0 || boostTimer <= 0) {
                 isBoosting = false;
             } else {
-                // Add particles while boosting
+                // Add boost particles
                 Vector2 offset4 = new Vector2(50, 50); // First particle (center)
                 Vector2 offset5 = new Vector2(40, 50); // Second particle (left)
                 Vector2 offset6 = new Vector2(60, 50); // Third particle (right)
@@ -238,13 +288,13 @@ public class Player {
                     offset5.set(120, 50);
                     offset6.set(100, 50);
                 } else if (lastDirection.y > 0) { // Moving up
-                    offset4.set(50, 50);
-                    offset5.set(40, 50);
-                    offset6.set(60, 50);
+                    offset4.set(80, 50);
+                    offset5.set(70, 50);
+                    offset6.set(90, 50);
                 } else if (lastDirection.y < 0) { // Moving down
-                    offset4.set(50, -10);
-                    offset5.set(40, -10);
-                    offset6.set(60, -10);
+                    offset4.set(80, -10);
+                    offset5.set(70, -10);
+                    offset6.set(90, -10);
                 }
 
                 // Calculate spawn positions for each particle
@@ -268,43 +318,10 @@ public class Player {
         }
     }
 
-    private boolean handleAttack(float deltaTime) {
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) { // Check for left mouse button click
-            stats.takeDamage(10); // Reduce player's health by 10
-            System.out.println("Player attacked! Health reduced by 10. Current health: " + stats.getHealth());
-            return true;
-        }
-        return false;
-    }
-
     private boolean handleMovement(float deltaTime) {
         boolean isMoving = false;
         Texture[] activeFrames = null;
 
-        // Handle diagonal movement
-        if (Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.D)) {
-            direction.set(1, 1);
-            lastDirection.set(1, 1);
-            activeFrames = walkingRightFrames;
-            isMoving = true;
-        } else if (Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.A)) {
-            direction.set(-1, 1);
-            lastDirection.set(-1, 1);
-            activeFrames = walkingLeftFrames;
-            isMoving = true;
-        } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D)) {
-            direction.set(1, -1);
-            lastDirection.set(1, -1);
-            activeFrames = walkingRightFrames;
-            isMoving = true;
-        } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.A)) {
-            direction.set(-1, -1);
-            lastDirection.set(-1, -1);
-            activeFrames = walkingLeftFrames;
-            isMoving = true;
-        }
-
-        // Handle cardinal movement
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             direction.y += 1;
             lastDirection.set(0, 1);
@@ -330,7 +347,7 @@ public class Player {
             isMoving = true;
         }
 
-        if (isMoving && activeFrames != null) {
+        if (isMoving && !isAttacking) {
             updateAnimation(activeFrames, deltaTime);
         }
 
@@ -358,7 +375,6 @@ public class Player {
         float currentSpeed = isBoosting ? speed * boostMultiplier : (isSprinting ? speed * sprintMultiplier : speed);
 
         direction.nor();
-
         Vector2 newPos = new Vector2(position).add(direction.scl(currentSpeed * deltaTime));
 
         if (!isColliding(newPos)) {
@@ -388,7 +404,7 @@ public class Player {
         for (Particle particle : boostParticles) {
             particle.render(batch);
         }
-        renderer.render(batch, position);
+        renderer.render(batch, position); // Render player
     }
 
     private Texture createParticleTexture() {
@@ -399,7 +415,6 @@ public class Player {
         pixmap.dispose(); // Free Pixmap memory
         return texture;
     }
-
 
     public void dispose() {
         renderer.dispose();
@@ -414,5 +429,9 @@ public class Player {
         standingRight.dispose();
 
         particleTexture.dispose(); // Dispose of particle texture
+    }
+
+    public Stats getStats() {
+        return stats;
     }
 }
