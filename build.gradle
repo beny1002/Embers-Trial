@@ -9,6 +9,7 @@ buildscript {
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
   }
   dependencies {
+    // Add any required Gradle plugin dependencies here
   }
 }
 
@@ -27,9 +28,9 @@ allprojects {
 configure(subprojects) {
   apply plugin: 'java-library'
 
-  // set java compatibility
+  // Set Java compatibility
   java {
-    sourceCompatibility = JavaVersion.VERSION_11 // change to your desired version
+    sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
   }
 
@@ -37,7 +38,7 @@ configure(subprojects) {
     implementation "software.amazon.awssdk:s3:2.20.0"
     implementation "software.amazon.awssdk:auth:2.20.0"
 
-    // add slf4j for logging
+    // Add slf4j for logging
     implementation 'org.slf4j:slf4j-simple:1.7.36'
   }
 
@@ -60,14 +61,4 @@ configure(subprojects) {
 subprojects {
   version = '$projectVersion'
   ext.appName = "Ember's Trials"
-  repositories {
-    mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org' }
-    mavenLocal()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
-    maven { url 'https://jitpack.io' }
-  }
 }
-
-eclipse.project.name = "Ember's Trials" + '-parent'

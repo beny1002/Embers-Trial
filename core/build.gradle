@@ -1,17 +1,36 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 eclipse.project.name = appName + '-core'
 
-// set java compatibility for the core project
+// Set Java compatibility for the core project
 java {
   sourceCompatibility = JavaVersion.VERSION_11 // or your desired version
   targetCompatibility = JavaVersion.VERSION_11
 }
 
+repositories {
+  mavenCentral()
+  maven { url 'https://jitpack.io' } // Add JitPack repository
+}
+
 dependencies {
-  // core libgdx dependencies
+  // JavaFX dependencies
+
+  // Core libGDX dependencies
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
 
-  // aws sdk dependencies for s3 functionality
+  // AWS SDK dependencies for S3 functionality
   implementation "software.amazon.awssdk:s3:2.20.0"
   implementation "software.amazon.awssdk:auth:2.20.0"
+  implementation 'com.github.libgdx:gdx-video:1.3.2'
 }
+
+tasks.register('debugPaths') {
+  doLast {
+    println "JavaFX JARs:"
+    println file("javafx-sdk-23.0.1/lib/javafx.base.jar").exists() ? "Found javafx.base.jar" : "Missing javafx.base.jar"
+    println file("javafx-sdk-23.0.1/lib/javafx.controls.jar").exists() ? "Found javafx.controls.jar" : "Missing javafx.controls.jar"
+    println file("javafx-sdk-23.0.1/lib/javafx.media.jar").exists() ? "Found javafx.media.jar" : "Missing javafx.media.jar"
+    println file("javafx-sdk-23.0.1/lib/javafx.swing.jar").exists() ? "Found javafx.swing.jar" : "Missing javafx.swing.jar"
+  }
+}
+
