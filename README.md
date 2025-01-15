@@ -1,5 +1,7 @@
 # Ember's Trial AWS Hackathon Project
 
+This project is still a work in progress.
+
 Ember's Trial is a round-based RPG game built in Java using LibGDX, featuring endless rounds of combat, experience-based progression, and customizable kit upgrades. This project was developed as part of Amazon's AWS hackathon using an Agile approach to collaboration and development.
 
 ---
