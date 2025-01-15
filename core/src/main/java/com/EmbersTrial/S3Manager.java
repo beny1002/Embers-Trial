@@ -13,7 +13,7 @@ public class S3Manager {
     private final String bucketName = "embertrials";
 
     public S3Manager() {
-        AwsBasicCredentials awsCreds = AwsBasicCredentials.create("AKIAYRH5NC7XO6HV2U47", "16vwSPoXltIkuV0XApkVcTHJZJxxK6Ug0s3lh3zq");
+        AwsBasicCredentials awsCreds = AwsBasicCredentials.create("AKIAYRH5NC7XJIV75Y6Q ", "XQxrMIgeloU3IAvwOmXumrQe0c45SSNdnF4rY3k2");
 
         s3 = S3Client.builder()
             .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
